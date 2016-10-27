@@ -318,14 +318,14 @@ class Connection {
 				if(filesize($fname) > 1048576)
 					file_put_contents($fname, '');
 			}
-			$handle = fopen($fname, 'a');
+			$handle = @fopen($fname, 'a');
 			foreach($statements as $statement) {
 				if(!is_scalar($statement))
 					$statement = var_export($statement, true);
 	
-				fwrite($handle, $statement . "\n");
+				@fwrite($handle, $statement . "\n");
 			}
-			fclose($handle);
+			@fclose($handle);
 		} catch(Exception $ex) {
 			error_log("Cannot log, \r\n" . $ex -> getMessage() . "\r\n------------\r\n" . $ex->getTraceAsString());
 		}
