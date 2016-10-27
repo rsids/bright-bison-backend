@@ -1,5 +1,9 @@
 {
   "name": "fur/bright/library",
   "type": "library",
-  "description": "Bright Legacy API"
+  "description": "Bright Legacy API",
+
+  "require-dev": {
+    "phpmd/phpmd" : "@stable"
+  }
 }
