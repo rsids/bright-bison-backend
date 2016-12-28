@@ -391,6 +391,13 @@ class Files extends Permissions {
 		}
 
 		rename(BASEPATH . UPLOADFOLDER . $oldPath . $filename, BASEPATH . UPLOADFOLDER . $newPath . $filename);
+
+        if(class_exists('FileHook')) {
+            $ph = new FileHook();
+            if(method_exists($ph, 'moveFile')) {
+                $ph->moveFile($oldPath, $newPath, $filename);
+            }
+        }
 		return $this -> getFiles($oldPath);
 
 	}
@@ -415,8 +422,9 @@ class Files extends Permissions {
 			throw $this -> throwException(4007);
 
 		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
-		if(!is_dir($folder))
-			throw $this -> throwException(4002);
+		if(!is_dir($folder)) {
+            throw $this->throwException(4002);
+        }
 
 
 		$thumbParts = explode('.', $filename);
@@ -434,6 +442,13 @@ class Files extends Permissions {
 				/*Swallow it*/
 			}
             unlink($folder . $filename);
+
+            if(class_exists('FileHook')) {
+                $ph = new FileHook();
+                if(method_exists($ph, 'deleteFile')) {
+                    $ph->deleteFile($filename, $dir);
+                }
+            }
 
 		} else if($throwNotExistsException) {
 			throw $this -> throwException(4005);
@@ -547,6 +562,13 @@ class Files extends Permissions {
 				}
 			}
 		}
+
+        if(class_exists('FileHook')) {
+            $ph = new FileHook();
+            if(method_exists($ph, 'uploadFile')) {
+                $ph->uploadFile($filename, $parent);
+            }
+        }
 		return (object) array('files' => $this -> getFiles($parent), 'file' => $filename);
 	}
 	
