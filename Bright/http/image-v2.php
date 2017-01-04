@@ -1,7 +1,6 @@
 <?php
 include_once(__DIR__  . '/../Bright.php');
 include_once(__DIR__  . '/../images/Image.php');
-include_once(__DIR__  . '/../../vendor/autoload.php');
 
 $path = filter_input(INPUT_GET, 'src', FILTER_SANITIZE_STRING);
 $mode = filter_input(INPUT_GET, 'mode', FILTER_SANITIZE_STRING);

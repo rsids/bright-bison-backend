@@ -40,6 +40,11 @@ if(is_dir(BASEPATH . 'bright/externallibs')) {
 	ini_set('include_path', ini_get('include_path') . PATH_SEPARATOR .
 						BASEPATH . 'bright/externallibs');
 }
+
+if(file_exists(BASEPATH . 'vendor/autoload.php')) {
+    require_once BASEPATH . 'vendor/autoload.php';
+}
+
 class BrightAutoloader {
 	public function __construct() {
 		spl_autoload_register(array($this, '_namespaceLoader'));
