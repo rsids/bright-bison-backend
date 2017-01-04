@@ -35,6 +35,9 @@ class BaseConstants {
 	const CACHE_MODE_FILE = 1;
 	const CACHE_MODE_APC = 2;
 
+	const MAILER_MODE_SWIFT = 1;
+	const MAILER_MODE_MAILJET = 2;
+
 	protected $DB_HOST;
 	protected $DB_USER;
 	protected $DB_PASSWORD;
@@ -226,6 +229,8 @@ class BaseConstants {
 
 	protected $CACHEPREFIX = 'bright';
 
+	protected $MAIL_MODE = BaseConstants::MAILER_MODE_SWIFT;
+
 	function __construct() {
 		// Do not change from here
 		if($this -> BASEPATH != '') {
@@ -318,6 +323,7 @@ class BaseConstants {
 //		define('CACHE_MODE', ini_get('apc.enabled') == '1' ? self::CACHE_MODE_APC : self::CACHE_MODE_FILE);
 
         define('CACHE_MODE',  self::CACHE_MODE_FILE);
+        define('MAIL_MODE',  $this->MAIL_MODE);
 
 		define('CACHEPREFIX', $this -> CACHEPREFIX);
 		define('SAFE_EXEC_ALLOWED', $this -> SAFE_EXEC_ALLOWED);

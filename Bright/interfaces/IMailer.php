@@ -1,34 +1,10 @@
 <?php
 
-/**
- * Wrapper class to send e-mails with
- * Version history:
- * 2.2 20120419
- * - Implements sendHtmlMail
- * @author Ids Klijnsma - Fur
- * @version 2.2
- * @package Bright
- * @subpackage utils
- */
-class Mailer extends Permissions implements \Bright\interfaces\IMailer
+namespace Bright\interfaces;
+
+
+interface IMailer
 {
-
-    /**
-     * @var \Bright\interfaces\IMailer
-     */
-    private $mailer;
-
-    function __construct($forceCache = false) {
-        parent::__construct();
-
-        if(MAIL_MODE == BaseConstants::MAILER_MODE_SWIFT) {
-            $this -> mailer = new \Bright\mailer\SwiftMailer();
-
-        } else {
-            $this -> mailer = new \Bright\mailer\MailjetMailer();
-        }
-    }
-
     /**
      * Sends an e-mail
      * @since 2.1 Added cc, bcc, attachments
@@ -41,10 +17,8 @@ class Mailer extends Permissions implements \Bright\interfaces\IMailer
      * @param array $attachments An array of attachments
      * @return boolean True when successful
      */
-    public function sendPlainMail($from, $to, $subject, $message, $cc = null, $bcc = null, $attachments = null)
-    {
-        return $this->mailer->sendPlainMail($from, $to, $subject, $message, $cc, $bcc, $attachments);
-    }
+    public function sendPlainMail($from, $to, $subject, $message, $cc = null, $bcc = null, $attachments = null);
+
 
     /**
      * Sends an e-mail
@@ -59,10 +33,7 @@ class Mailer extends Permissions implements \Bright\interfaces\IMailer
      * @param array $attachments An array of attachments
      * @return boolean True when successful
      */
-    public function sendHtmlMail($from, $to, $subject, $messageHtml, $messagePlain = null, $cc = null, $bcc = null, $attachments = null)
-    {
-        return $this->mailer->sendHtmlMail($from, $to, $subject, $messageHtml, $messagePlain, $cc, $bcc, $attachments);
-    }
+    public function sendHtmlMail($from, $to, $subject, $messageHtml, $messagePlain = null, $cc = null, $bcc = null, $attachments = null);
 
     /**
      * Sends a mailing to a list of email addresses
@@ -75,8 +46,5 @@ class Mailer extends Permissions implements \Bright\interfaces\IMailer
      * @throws \Exception
      * @todo Describe replacements;
      */
-    public function sendMassMail($from, $to, $subject, $message, $replacements = null)
-    {
-        return $this->mailer->sendMassMail($from, $to, $subject, $message, $replacements);
-    }
+    public function sendMassMail($from, $to, $subject, $message, $replacements = null);
 }
