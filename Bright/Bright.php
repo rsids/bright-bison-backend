@@ -47,8 +47,8 @@ if(file_exists(BASEPATH . 'vendor/autoload.php')) {
 
 class BrightAutoloader {
 	public function __construct() {
-		spl_autoload_register(array($this, '_namespaceLoader'));
-		spl_autoload_register(array($this, '_loader'));
+		spl_autoload_register([$this, '_namespaceLoader']);
+		spl_autoload_register([$this, '_loader']);
 	}
 
 	private function _namespaceLoader($className) {
