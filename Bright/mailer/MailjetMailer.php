@@ -77,13 +77,34 @@ class MailjetMailer implements IMailer
     {
         $mj = new \Mailjet\Client(MAILJET_PUBLIC, MAILJET_SECRET);
 
+        $fromName = null;
+        if(is_array($from)) {
+            $fromName = array_values($from);
+            $fromName = $fromName[0];
+            $from = array_keys($from);
+            $from = $from[0];
+        }
+
         $body = [
             'FromEmail' => $from,
             'Subject' => $subject,
-            'To' => $this->formatRecipients($to),
-            'Cc' => $this->formatRecipients($cc),
-            'Bcc' => $this->formatRecipients($bcc),
+            'To' => $this->formatRecipients($to)
         ];
+
+        if($fromName) {
+            $body['FromName'] = $fromName;
+        }
+
+        $cc = $this->formatRecipients($cc);
+
+        if($cc) {
+            $body['Cc'] = $cc;
+        }
+
+        $bcc = $this->formatRecipients($bcc);
+        if($bcc) {
+            $body['Bcc'] = $bcc;
+        }
 
         if ($messagePlain) {
             $body['Text-part'] = $messagePlain;
@@ -96,7 +117,6 @@ class MailjetMailer implements IMailer
         if ($attachments) {
             $body['Attachments'] = $this->formatAttachments($attachments);
         }
-
         $response = $mj->post(\Mailjet\Resources::$Email, ['body' => $body]);
 
         return $response->success();
