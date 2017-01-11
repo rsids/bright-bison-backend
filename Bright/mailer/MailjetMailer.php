@@ -133,11 +133,11 @@ class MailjetMailer implements IMailer
             $attachments = [$attachments];
         }
 
-
         $formatted = [];
 
         foreach ($attachments as $att) {
             $this->checkAttachment($att);
+            $formatted[] = $att;
         }
 
         return $formatted;
