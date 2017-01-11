@@ -3,6 +3,7 @@
 namespace Bright\mailer;
 
 use Bright\interfaces\IMailer;
+use Bright\utils\ArrayUtils;
 
 class MailjetMailer implements IMailer
 {
@@ -128,27 +129,34 @@ class MailjetMailer implements IMailer
 
     private function formatAttachments($attachments)
     {
-        if (!is_array($attachments)) {
+        if(ArrayUtils::IsAssoc($attachments)) {
             $attachments = [$attachments];
         }
 
+
         $formatted = [];
 
-        foreach ($attachments as $att) {
-            if (file_exists($att)) {
-                $pathParts = explode(DIRECTORY_SEPARATOR, $att);
-                $filename = array_pop($pathParts);
-
-                $formatted[] = (object)[
-                    'Content-type' => mime_content_type($att),
-                    'Filename' => $filename,
-                    'content' => base64_encode(file_get_contents($att))
-                ];
-            } else {
-                \Connection::getInstance()->addTolog($att . ' does not exist and is therefore not attached to message');
+        foreach ($attachments as $atta) {
+            foreach($atta as $att) {
+                $this->checkAttachment($att);
             }
         }
 
         return $formatted;
+    }
+
+    private function checkAttachment($attachment)
+    {
+        if(!array_key_exists('Content-type', $attachment)) {
+            throw new \Exception('Attachment is missing key "Content-type"');
+        }
+        if(!array_key_exists('Filename', $attachment)) {
+            throw new \Exception('Attachment is missing key "Filename"');
+        }
+        if(!array_key_exists('content', $attachment)) {
+            throw new \Exception('Attachment is missing key "content"');
+        }
+
+        return true;
     }
 }

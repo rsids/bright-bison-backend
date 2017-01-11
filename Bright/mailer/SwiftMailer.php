@@ -4,6 +4,7 @@ namespace Bright\mailer;
 
 
 use Bright\interfaces\IMailer;
+use Bright\utils\ArrayUtils;
 
 class SwiftMailer implements IMailer
 {
@@ -259,15 +260,22 @@ class SwiftMailer implements IMailer
         }
 
         if ($attachments != null) {
-            if (!is_array($attachments)) {
+            if (!is_array($attachments) || ArrayUtils::IsAssoc($attachments)) {
                 $attachments = array($attachments);
             }
 
             foreach ($attachments as $att) {
-                if (file_exists($att)) {
+                if (is_string($att) && file_exists($att)) {
                     $msg->attach(Swift_Attachment::fromPath($att));
                 } else if ($att instanceof Swift_Attachment) {
                     $msg->attach($att);
+                } else if ($this->checkAttachment($att)) {
+                    $msg->attach(Swift_Attachment::newInstance(
+                        $att['content'],
+                        $att['Filename'],
+                        $att['Content-type']
+                    ));
+
                 } else {
                     Connection::getInstance()->addTolog($att . ' does not exist and is therefore not attached to message with subject ' . $subject);
                 }
@@ -294,6 +302,21 @@ class SwiftMailer implements IMailer
             $result = false;
         }
         return $result;
+    }
+
+    private function checkAttachment($attachment)
+    {
+        if (!array_key_exists('Content-type', $attachment)) {
+            return false;
+        }
+        if (!array_key_exists('Filename', $attachment)) {
+            return false;
+        }
+        if (!array_key_exists('content', $attachment)) {
+            return false;
+        }
+
+        return true;
     }
 
 }
