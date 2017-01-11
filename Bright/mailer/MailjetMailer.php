@@ -136,10 +136,8 @@ class MailjetMailer implements IMailer
 
         $formatted = [];
 
-        foreach ($attachments as $atta) {
-            foreach($atta as $att) {
-                $this->checkAttachment($att);
-            }
+        foreach ($attachments as $att) {
+            $this->checkAttachment($att);
         }
 
         return $formatted;
