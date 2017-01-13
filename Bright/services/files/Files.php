@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The Files class manages the files uploaded by the user.
  * Version history:
@@ -15,66 +16,70 @@
  * @package Bright
  * @subpackage files
  */
-class Files extends Permissions {
+class Files extends Permissions
+{
 
-	/**
-	 * @var StdClass Object holding the paths and folders of the userfiles
-	 */
-	private $filesettings;
+    /**
+     * @var StdClass Object holding the paths and folders of the userfiles
+     */
+    private $filesettings;
 
-	/**
-	 * @var StdClass Holds the Connection singleton
-	 */
-	private $_conn;
-
-
-	function __construct() {
-		parent::__construct();
-		$this -> IS_AUTH = true;
-		$this -> _conn = Connection::getInstance();
-		$cfg = new Config();
-		$this -> filesettings = $cfg -> getFileSettings();
-	}
+    /**
+     * @var StdClass Holds the Connection singleton
+     */
+    private $_conn;
 
 
-	/**
-	 * Gets the filesettings
-	 * @return StdClass Object holding the paths and folders of the userfiles
-	 */
-	public function getConfig() {
-		return $this -> filesettings;
-	}
+    function __construct()
+    {
+        parent::__construct();
+        $this->IS_AUTH = true;
+        $this->_conn = Connection::getInstance();
+        $cfg = new Config();
+        $this->filesettings = $cfg->getFileSettings();
+    }
 
-	/**
-	 * Gets additional information about a file;
-	 * @param string $file The path to the file
-	 * @since 2.3
-	 * @return object An object containing the file size, and, if it's an image, the dimensions of the image
-	 */
-	public function getProperties($file) {
-		$file = filter_var($file, FILTER_SANITIZE_STRING);
-		if(strpos($file, '..'))
-			return null;
-		$fname = BASEPATH . UPLOADFOLDER . $file;
-		if(file_exists($fname) && !is_dir($fname)) {
-			// it's a file;
-			$stats = @stat($fname);
-			$imsize = @getimagesize($fname);
-			$obj = new StdClass();
-			if($stats) {
-				$obj -> filesize = $stats[7];
-			}
-			if($imsize) {
-				$obj -> width = $imsize[0];
-				$obj -> height = $imsize[1];
-			}
-			if(!$stats && !$imsize) {
-				return null;
-			}
-			return $obj;
-		}
-		return null;
-	}
+
+    /**
+     * Gets the filesettings
+     * @return StdClass Object holding the paths and folders of the userfiles
+     */
+    public function getConfig()
+    {
+        return $this->filesettings;
+    }
+
+    /**
+     * Gets additional information about a file;
+     * @param string $file The path to the file
+     * @since 2.3
+     * @return object An object containing the file size, and, if it's an image, the dimensions of the image
+     */
+    public function getProperties($file)
+    {
+        $file = filter_var($file, FILTER_SANITIZE_STRING);
+        if (strpos($file, '..'))
+            return null;
+        $fname = BASEPATH . UPLOADFOLDER . $file;
+        if (file_exists($fname) && !is_dir($fname)) {
+            // it's a file;
+            $stats = @stat($fname);
+            $imsize = @getimagesize($fname);
+            $obj = new StdClass();
+            if ($stats) {
+                $obj->filesize = $stats[7];
+            }
+            if ($imsize) {
+                $obj->width = $imsize[0];
+                $obj->height = $imsize[1];
+            }
+            if (!$stats && !$imsize) {
+                return null;
+            }
+            return $obj;
+        }
+        return null;
+    }
 
     /**
      * Gets the subfolders of a given directory<br/>
@@ -86,56 +91,57 @@ class Files extends Permissions {
      * @return array An array of directories (OFolders)
      * @throws Exception
      */
-	public function getSubFolders($dir = '') {
-		$folders = array();
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException( 1001);
+    public function getSubFolders($dir = '')
+    {
+        $folders = array();
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		if($dir == '/')
-			$dir = '';
+        if ($dir == '/')
+            $dir = '';
 
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
-		if(!is_dir(BASEPATH . UPLOADFOLDER)) {
-			try {
-				@mkdir(BASEPATH . UPLOADFOLDER);
-			} catch(Exception $ex) {
-				throw $this -> throwException(Exceptions::FOLDER_NOT_FOUND);
-			}
-		}
-		if(!is_dir($folder))
-			throw $this -> throwException(Exceptions::FOLDER_NOT_FOUND);
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
+        if (!is_dir(BASEPATH . UPLOADFOLDER)) {
+            try {
+                @mkdir(BASEPATH . UPLOADFOLDER);
+            } catch (Exception $ex) {
+                throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            }
+        }
+        if (!is_dir($folder))
+            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
 
-		$files = scandir($folder);
-		foreach($files as $file) {
-			if ($file != '.' && $file != '..' && is_dir ($folder . $file)) {
+        $files = scandir($folder);
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..' && is_dir($folder . $file)) {
 
-				$of = new OFolder();
-				$of -> label = $file;
-				$of -> path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder . $file . '/');
-				try {
-					$of -> numChildren = 0;
-					$subFolder = scandir($folder . $file);
-					foreach($subFolder as $sf) {
-						if($sf != '.' && $sf != '..' && is_dir ($folder . $file . '/' . $sf)) {
-							$of -> numChildren++;
-						}
-					}
-				} catch(Exception $ex) {
-					$of -> numChildren = 0;
-				}
+                $of = new OFolder();
+                $of->label = $file;
+                $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder . $file . '/');
+                try {
+                    $of->numChildren = 0;
+                    $subFolder = scandir($folder . $file);
+                    foreach ($subFolder as $sf) {
+                        if ($sf != '.' && $sf != '..' && is_dir($folder . $file . '/' . $sf)) {
+                            $of->numChildren++;
+                        }
+                    }
+                } catch (Exception $ex) {
+                    $of->numChildren = 0;
+                }
 
-				if($of -> numChildren > 0)
-					$of -> children = array();
+                if ($of->numChildren > 0)
+                    $of->children = array();
 
-				$folders[] = $of;
-				unset($of);
-			}
+                $folders[] = $of;
+                unset($of);
+            }
 
-		}
+        }
 
-		usort($folders, array($this, '_sortFolders'));
-		return $folders;
-	}
+        usort($folders, array($this, 'sortFolders'));
+        return $folders;
+    }
 
     /**
      * Gets the entire folder structure of the user upload directory<br/>
@@ -146,51 +152,53 @@ class Files extends Permissions {
      * @return array A multi-dimensional array of OFolders
      * @throws Exception
      */
-	public function getStructure() {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException( 1001);
+    public function getStructure()
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		$folder = new OFolder();
-		$folder -> label = str_replace('/', '', UPLOADFOLDER);
-		$folder -> path = '/';
-		$folder -> children = $this -> _readFolder('');
-		$folder -> numChildren = count($folder -> children);
-		return array($folder);
-	}
+        $folder = new OFolder();
+        $folder->label = str_replace('/', '', UPLOADFOLDER);
+        $folder->path = '/';
+        $folder->children = $this->_readFolder('');
+        $folder->numChildren = count($folder->children);
+        return array($folder);
+    }
 
-	/**
-	 * Recursive function to walk the folder tree of the user upload directory
-	 * @param string $path The path of the folder
-	 * @return array An array of folders
-	 */
-	private function _readFolder($path) {
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $path . '/');
-		$files = scandir($folder);
-		$folders = array();
-		foreach($files as $file) {
-			if ($file != '.' && $file != '..' && is_dir ($folder . $file)) {
+    /**
+     * Recursive function to walk the folder tree of the user upload directory
+     * @param string $path The path of the folder
+     * @return array An array of folders
+     */
+    private function _readFolder($path)
+    {
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $path . '/');
+        $files = scandir($folder);
+        $folders = array();
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..' && is_dir($folder . $file)) {
 
-				$of = new OFolder();
-				$of -> label = $file;
-				$of -> path = str_replace(BASEPATH . UPLOADFOLDER,  '',  $folder . $file . '/');
-				try {
-					$of -> numChildren = count(scandir($folder . $file)) - 2;
-				} catch(Exception $ex) {
-					$of -> numChildren = 0;
-				}
+                $of = new OFolder();
+                $of->label = $file;
+                $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder . $file . '/');
+                try {
+                    $of->numChildren = count(scandir($folder . $file)) - 2;
+                } catch (Exception $ex) {
+                    $of->numChildren = 0;
+                }
 
-				if($of -> numChildren > 0)
-					$of -> children = $this -> _readFolder($path . '/' . $file);
+                if ($of->numChildren > 0)
+                    $of->children = $this->_readFolder($path . '/' . $file);
 
-				$folders[] = $of;
-				unset($of);
-			}
+                $folders[] = $of;
+                unset($of);
+            }
 
-		}
+        }
 
-		usort($folders, array($this, '_sortFolders'));
-		return $folders;
-	}
+        usort($folders, array($this, 'sortFolders'));
+        return $folders;
+    }
 
     /**
      * Gets the files in the given folder
@@ -202,50 +210,51 @@ class Files extends Permissions {
      * @return array An array of files
      * @throws Exception
      */
-	public function getFiles($dir = '', $returnThumbs = true, $exclude_ext = null, $extended = false, $include_ext = null) {
-		if($dir == '/')
-			$dir = '';
+    public function getFiles($dir = '', $returnThumbs = true, $exclude_ext = null, $extended = false, $include_ext = null)
+    {
+        if ($dir == '/')
+            $dir = '';
 
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
-		if(!is_dir($folder))
-			throw $this -> throwException(Exceptions::FOLDER_NOT_FOUND);
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
+        if (!is_dir($folder))
+            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
 
-		if(!$exclude_ext)
-			$exclude_ext = array();
+        if (!$exclude_ext)
+            $exclude_ext = array();
 
-		$result = array();
-		$files = scandir($folder);
-		foreach($files as $file) {
-			if ($file != '.' && $file != '..' && !is_dir ($folder . $file) && $file != '.htaccess') {
-				$path_parts 	= pathinfo($folder . $file);
-				$path_ext		= array_key_exists('extension', $path_parts) ? strtolower($path_parts['extension']) : '';
-				if($path_ext == '') {
-					$af = explode('.', $file);
-					$path_ext = array_pop($af);
-				}
-				$path_file		= strtolower($path_parts['filename']);
-				if(strpos($path_file, '__thumb__') === false || $returnThumbs) {
+        $result = array();
+        $files = scandir($folder);
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..' && !is_dir($folder . $file) && $file != '.htaccess') {
+                $path_parts = pathinfo($folder . $file);
+                $path_ext = array_key_exists('extension', $path_parts) ? strtolower($path_parts['extension']) : '';
+                if ($path_ext == '') {
+                    $af = explode('.', $file);
+                    $path_ext = array_pop($af);
+                }
+                $path_file = strtolower($path_parts['filename']);
+                if (strpos($path_file, '__thumb__') === false || $returnThumbs) {
 
-					if(count($exclude_ext) == 0 || !in_array($path_ext, $exclude_ext) && ($include_ext == null || in_array($path_ext, $include_ext))) {
+                    if (count($exclude_ext) == 0 || !in_array($path_ext, $exclude_ext) && ($include_ext == null || in_array($path_ext, $include_ext))) {
 
-						$of = new OFile();
-						$of -> filename = $file;
-						$of -> path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder);
-						$of -> extension = $path_ext;
-                        $of -> modificationdate = filemtime($folder . $file);
-						$of -> filesize = filesize($folder . $file);
+                        $of = new OFile();
+                        $of->filename = $file;
+                        $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder);
+                        $of->extension = $path_ext;
+                        $of->modificationdate = filemtime($folder . $file);
+                        $of->filesize = filesize($folder . $file);
 
-						$result[] = $of;
-						unset($of);
-					}
+                        $result[] = $of;
+                        unset($of);
+                    }
 
-				}
-			}
+                }
+            }
 
-		}
-		usort($result, array($this, '_sortFiles'));
-		return $result;
-	}
+        }
+        usort($result, array($this, 'sortFiles'));
+        return $result;
+    }
 
     /**
      * Creates a folder<br/>
@@ -258,40 +267,41 @@ class Files extends Permissions {
      * @return array An array of folders, which are the subfolders of $dir
      * @throws Exception
      */
-	public function createFolder($folderName, $dir) {
+    public function createFolder($folderName, $dir)
+    {
 
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException( 1001);
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
-		if(!is_dir($folder))
-			throw $this -> throwException(4002);
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
+        if (!is_dir($folder))
+            throw $this->throwException(4002);
 
-		if(is_dir($folder . $folderName))
-			return $this -> getSubFolders($dir);
+        if (is_dir($folder . $folderName))
+            return $this->getSubFolders($dir);
 
-		$success = false;
+        $success = false;
 
-		if ($folderName != '') {
-			if(USEFTPFORFOLDERS === true) {
+        if ($folderName != '') {
+            if (USEFTPFORFOLDERS === true) {
 
-				$folder = str_replace('//', '/', FTPBASEPATH . UPLOADFOLDER . $dir . '/');
+                $folder = str_replace('//', '/', FTPBASEPATH . UPLOADFOLDER . $dir . '/');
 
                 $connectionId = ftp_connect(FTPSERVER);
-				ftp_login($connectionId, FTPUSER, FTPPASS);
-				$success = ftp_mkdir($connectionId, $folder . $folderName) !== false;
-				ftp_site($connectionId, 'CHMOD 777 ' . $folder . $folderName);
-				ftp_close($connectionId);
+                ftp_login($connectionId, FTPUSER, FTPPASS);
+                $success = ftp_mkdir($connectionId, $folder . $folderName) !== false;
+                ftp_site($connectionId, 'CHMOD 777 ' . $folder . $folderName);
+                ftp_close($connectionId);
 
-			} else {
-				$success = mkdir($folder .$folderName);
-			}
-		}
-		if(!$success)
-			throw $this -> throwException(4008);
+            } else {
+                $success = mkdir($folder . $folderName);
+            }
+        }
+        if (!$success)
+            throw $this->throwException(4008);
 
-		return $this -> getSubFolders($dir);
-	}
+        return $this->getSubFolders($dir);
+    }
 
     /**
      * Deletes a directory<br/>
@@ -304,38 +314,39 @@ class Files extends Permissions {
      * @return array The sub-dirs of $parent
      * @throws Exception
      */
-	public function deleteFolder($folderName, $parent) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function deleteFolder($folderName, $parent)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $parent . '/');
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $parent . '/');
 
-		if(!is_dir($folder . $folderName))
-			throw $this -> throwException(Exceptions::FOLDER_NOT_FOUND);
+        if (!is_dir($folder . $folderName))
+            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
 
 
-		$success = false;
-		$arr = scandir($folder . $folderName);
+        $success = false;
+        $arr = scandir($folder . $folderName);
 
-		if ($folderName != '' && count($arr) == 2) {
-			if(USEFTPFORFOLDERS === true) {
+        if ($folderName != '' && count($arr) == 2) {
+            if (USEFTPFORFOLDERS === true) {
 
-				$folder = str_replace('//', '/', FTPBASEPATH . UPLOADFOLDER . $parent . '/');
+                $folder = str_replace('//', '/', FTPBASEPATH . UPLOADFOLDER . $parent . '/');
 
                 $connectionId = ftp_connect(FTPSERVER);
-				ftp_login($connectionId, FTPUSER, FTPPASS);
-				$success = ftp_rmdir($connectionId, $folder . $folderName);
-				ftp_close($connectionId);
+                ftp_login($connectionId, FTPUSER, FTPPASS);
+                $success = ftp_rmdir($connectionId, $folder . $folderName);
+                ftp_close($connectionId);
 
-			} else {
-				$success = rmdir($folder.$folderName);
-			}
-		}
-		if(!$success)
-			throw $this -> throwException(4004);
+            } else {
+                $success = rmdir($folder . $folderName);
+            }
+        }
+        if (!$success)
+            throw $this->throwException(4004);
 
-		return $this -> getSubFolders($parent);
-	}
+        return $this->getSubFolders($parent);
+    }
 
 
     /**
@@ -350,57 +361,60 @@ class Files extends Permissions {
      * @return array The contents of oldpath
      * @throws Exception
      */
-	public function moveFile ($oldPath, $newPath, $filename) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function moveFile($oldPath, $newPath, $filename)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		if(!is_dir(BASEPATH . UPLOADFOLDER . $oldPath))
-			throw $this -> throwException(4002);
+        if (!is_dir(BASEPATH . UPLOADFOLDER . $oldPath))
+            throw $this->throwException(4002);
 
-		if(!file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $filename))
-			throw $this -> throwException(4005);
+        if (!file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $filename))
+            throw $this->throwException(4005);
 
-		if(file_exists(BASEPATH . UPLOADFOLDER . $newPath . $filename))
-			throw $this -> throwException(4006);
+        if (file_exists(BASEPATH . UPLOADFOLDER . $newPath . $filename))
+            throw $this->throwException(4006);
 
-		$thumbParts = explode('.', $filename);
-		$thumbParts[count($thumbParts) - 2] .= '__thumb__';
-		$thumb = join('.', $thumbParts);
-		$ext = $thumbParts[count($thumbParts) - 1];
-		if(file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $thumb))
-			rename(BASEPATH . UPLOADFOLDER . $oldPath . $thumb, BASEPATH . UPLOADFOLDER . $newPath . $thumb);
+        $thumbParts = explode('.', $filename);
+        $thumbParts[count($thumbParts) - 2] .= '__thumb__';
+        $thumb = join('.', $thumbParts);
+        $ext = $thumbParts[count($thumbParts) - 1];
+        if (file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $thumb))
+            rename(BASEPATH . UPLOADFOLDER . $oldPath . $thumb, BASEPATH . UPLOADFOLDER . $newPath . $thumb);
 
-		if(strpos($filename, '__thumb__') !== false) {
-			// Dragged file IS a thumb, move original too
-			$thumbParts = explode('__thumb__', $filename);
-			$thumb = join('', $thumbParts);
-			if(file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $thumb))
-				rename(BASEPATH . UPLOADFOLDER . $oldPath . $thumb, BASEPATH . UPLOADFOLDER . $newPath . $thumb);
-		}
-		if(strtolower($ext) === 'pdf') {
-			// Update page
-			$page = new Page();
-			$p = $page -> getPageByLabel(md5($oldPath . $filename));
-			if($p) {
-				$p -> label = md5($newPath . $filename);
-				$p -> content -> path -> all = $oldPath . $filename;
-				$page -> setPage($p);
-			} else {
-				// Re-index
-			}
-		}
+        if (strpos($filename, '__thumb__') !== false) {
+            // Dragged file IS a thumb, move original too
+            $thumbParts = explode('__thumb__', $filename);
+            $thumb = join('', $thumbParts);
+            if (file_exists(BASEPATH . UPLOADFOLDER . $oldPath . $thumb))
+                rename(BASEPATH . UPLOADFOLDER . $oldPath . $thumb, BASEPATH . UPLOADFOLDER . $newPath . $thumb);
+        }
+        if (strtolower($ext) === 'pdf') {
+            // Update page
+            $page = new Page();
+            $p = $page->getPageByLabel(md5($oldPath . $filename));
+            if ($p) {
+                $p->label = md5($newPath . $filename);
+                $p->content->path->all = $oldPath . $filename;
+                $page->setPage($p);
+            } else {
+                // Re-index
+            }
+        }
 
-		rename(BASEPATH . UPLOADFOLDER . $oldPath . $filename, BASEPATH . UPLOADFOLDER . $newPath . $filename);
+        rename(BASEPATH . UPLOADFOLDER . $oldPath . $filename, BASEPATH . UPLOADFOLDER . $newPath . $filename);
 
-        if(class_exists('FileHook')) {
+        $this->deleteThumbnails($filename, $oldPath);
+
+        if (class_exists('FileHook')) {
             $ph = new FileHook();
-            if(method_exists($ph, 'moveFile')) {
+            if (method_exists($ph, 'moveFile')) {
                 $ph->moveFile($oldPath, $newPath, $filename);
             }
         }
-		return $this -> getFiles($oldPath);
+        return $this->getFiles($oldPath);
 
-	}
+    }
 
     /**
      * Deletes a file<br/>
@@ -415,54 +429,58 @@ class Files extends Permissions {
      * @return array An array of files, which are in $path
      * @throws Exception
      */
-	public function deleteFile($filename, $dir, $throwNotExistsException = false) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		if(!$this -> DELETE_FILE)
-			throw $this -> throwException(4007);
+    public function deleteFile($filename, $dir, $throwNotExistsException = false)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
+        if (!$this->DELETE_FILE)
+            throw $this->throwException(4007);
 
-		$folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
-		if(!is_dir($folder)) {
+        $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
+        if (!is_dir($folder)) {
             throw $this->throwException(4002);
         }
 
 
-		$thumbParts = explode('.', $filename);
-		$thumbParts[count($thumbParts) - 2] .= '__thumb__';
-		$thumb = join('.', $thumbParts);
+        $thumbParts = explode('.', $filename);
+        $thumbParts[count($thumbParts) - 2] .= '__thumb__';
+        $thumb = join('.', $thumbParts);
 
-		if(file_exists($folder . $thumb))
-			unlink($folder . $thumb);
+        if (file_exists($folder . $thumb))
+            unlink($folder . $thumb);
 
-		if(file_exists($folder . $filename)) {
-			// Prevent unlink error
-			try {
-				chmod($folder . $filename, 0666);
-			} catch(Exception $ex) {
-				/*Swallow it*/
-			}
+        if (file_exists($folder . $filename)) {
+            // Prevent unlink error
+            try {
+                chmod($folder . $filename, 0666);
+            } catch (Exception $ex) {
+                /*Swallow it*/
+            }
             unlink($folder . $filename);
 
-            if(class_exists('FileHook')) {
+            $this->deleteThumbnails($filename, $dir);
+
+            if (class_exists('FileHook')) {
                 $ph = new FileHook();
-                if(method_exists($ph, 'deleteFile')) {
+                if (method_exists($ph, 'deleteFile')) {
                     $ph->deleteFile($filename, $dir);
                 }
             }
 
-		} else if($throwNotExistsException) {
-			throw $this -> throwException(4005);
-		}
+        } else if ($throwNotExistsException) {
+            throw $this->throwException(4005);
+        }
 
-		return $this -> getFiles($dir);
-	}
+        return $this->getFiles($dir);
+    }
 
-	public function deleteFiles($files, $path) {
-		foreach($files as $file) {
-			$this -> deleteFile($file[0], $file[1]);
-		}
-		return $this -> getFiles($path);
-	}
+    public function deleteFiles($files, $path)
+    {
+        foreach ($files as $file) {
+            $this->deleteFile($file[0], $file[1]);
+        }
+        return $this->getFiles($path);
+    }
 
     /**
      * Downloads a file from the given url and stores it on the server
@@ -472,114 +490,148 @@ class Files extends Permissions {
      * @return object
      * @throws Exception
      */
-	public function uploadFromUrl($url, $filename, $parent) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(Exceptions::NO_USER_AUTH);
-		
-		if($filename === '') {
-			$ua = explode('/', $url);
-			$filename = array_pop($ua);
-		}
-		$url = str_replace(' ', '%20', $url);
-		$url = filter_var($url, FILTER_VALIDATE_URL);
-		$filename = filter_var($filename, FILTER_SANITIZE_STRING);
-		$filename = preg_replace('/[\s&\|\+\!\(\)]/', '-', $filename);
-		$filename = str_replace('%20', '-', $filename);
-		while(strpos($filename, '--')) {
-			$filename = str_replace('--', '-', $filename);
-		}
-		$parent = filter_var($parent, FILTER_SANITIZE_STRING);
-		
-		if($url === false || $filename === false || $parent === false) {
-			throw $this -> throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
-		}
-		
-		if(strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
-			throw $this -> throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
-		}
-		
-		if(strpos($parent, '.') !== false) {
-			throw $this -> throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
-		}
-		
-		
-		if(!is_dir(BASEPATH . UPLOADFOLDER . $parent))
-			throw $this -> throwException(Exceptions::FOLDER_NOT_FOUND);
-		
-		$local = BASEPATH . UPLOADFOLDER . $parent . '/' . $filename;
-		$i = 1;
-		
-		$fileParts = explode('.', $filename);
-		$ext = array_pop($fileParts);
-		if(count($fileParts) > 0) {
-			$file = implode('.', $fileParts);
-		} else {
-			$file = $ext;
-		}
-		
-		if(BrightUtils::endsWith($file, '-'))
-			$file = substr($file, 0, -1);
-		
-		while(file_exists($local)) {
-			$local = BASEPATH . UPLOADFOLDER . "$parent/$file-$i.$ext"; 
-			$i++;
-		}
-		
-		try {
-			$ext = @file_get_contents($url);
-		} catch(Exception $e) {
-			throw $this -> throwException(Exceptions::UPLOAD_FAILED);
-		}
-		
-		if($ext === false)
-			throw $this -> throwException(Exceptions::UPLOAD_FAILED);
-			
-		$res = file_put_contents($local, $ext);
-		if($res === false)
-			throw $this -> throwException(Exceptions::UPLOAD_FAILED);
-		
-		
-		if(strpos($filename, '.') === false) {
-			// No extension supplied, add it.
-			$imgType = exif_imagetype($local);
-			if($imgType !== false) {
-				$add = '';
-				
-				switch($imgType) {
-					case IMAGETYPE_GIF:		$add = '.gif';break;
-					case IMAGETYPE_JPEG:	$add = '.jpg';break;
-					case IMAGETYPE_PNG:		$add = '.png';break;
-					case IMAGETYPE_SWF:		$add = '.swf';break;
-					case IMAGETYPE_PSD:		$add = '.psd';break;
-					case IMAGETYPE_BMP:		$add = '.bmp';break;
-					case IMAGETYPE_TIFF_II:	$add = '.tiff';break;
-					case IMAGETYPE_TIFF_MM:	$add = '.tiff';break;
-				}
-				if($add != '') {
-					// Found correct extension
-					rename($local, $local . $add);
-					$filename .= $add;
-				}
-			}
-		}
+    public function uploadFromUrl($url, $filename, $parent)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(Exceptions::NO_USER_AUTH);
 
-        if(class_exists('FileHook')) {
+        if ($filename === '') {
+            $ua = explode('/', $url);
+            $filename = array_pop($ua);
+        }
+        $url = str_replace(' ', '%20', $url);
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+        $filename = filter_var($filename, FILTER_SANITIZE_STRING);
+        $filename = preg_replace('/[\s&\|\+\!\(\)]/', '-', $filename);
+        $filename = str_replace('%20', '-', $filename);
+        while (strpos($filename, '--')) {
+            $filename = str_replace('--', '-', $filename);
+        }
+        $parent = filter_var($parent, FILTER_SANITIZE_STRING);
+
+        if ($url === false || $filename === false || $parent === false) {
+            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+        }
+
+        if (strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
+            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+        }
+
+        if (strpos($parent, '.') !== false) {
+            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+        }
+
+
+        if (!is_dir(BASEPATH . UPLOADFOLDER . $parent))
+            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+
+        $local = BASEPATH . UPLOADFOLDER . $parent . '/' . $filename;
+        $i = 1;
+
+        $fileParts = explode('.', $filename);
+        $ext = array_pop($fileParts);
+        if (count($fileParts) > 0) {
+            $file = implode('.', $fileParts);
+        } else {
+            $file = $ext;
+        }
+
+        if (BrightUtils::endsWith($file, '-'))
+            $file = substr($file, 0, -1);
+
+        while (file_exists($local)) {
+            $local = BASEPATH . UPLOADFOLDER . "$parent/$file-$i.$ext";
+            $i++;
+        }
+
+        try {
+            $ext = @file_get_contents($url);
+        } catch (Exception $e) {
+            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+        }
+
+        if ($ext === false)
+            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+
+        $res = file_put_contents($local, $ext);
+        if ($res === false)
+            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+
+
+        if (strpos($filename, '.') === false) {
+            // No extension supplied, add it.
+            $imgType = exif_imagetype($local);
+            if ($imgType !== false) {
+                $add = '';
+
+                switch ($imgType) {
+                    case IMAGETYPE_GIF:
+                        $add = '.gif';
+                        break;
+                    case IMAGETYPE_JPEG:
+                        $add = '.jpg';
+                        break;
+                    case IMAGETYPE_PNG:
+                        $add = '.png';
+                        break;
+                    case IMAGETYPE_SWF:
+                        $add = '.swf';
+                        break;
+                    case IMAGETYPE_PSD:
+                        $add = '.psd';
+                        break;
+                    case IMAGETYPE_BMP:
+                        $add = '.bmp';
+                        break;
+                    case IMAGETYPE_TIFF_II:
+                        $add = '.tiff';
+                        break;
+                    case IMAGETYPE_TIFF_MM:
+                        $add = '.tiff';
+                        break;
+                }
+                if ($add != '') {
+                    // Found correct extension
+                    rename($local, $local . $add);
+                    $filename .= $add;
+                }
+            }
+        }
+
+        if (class_exists('FileHook')) {
             $ph = new FileHook();
-            if(method_exists($ph, 'uploadFile')) {
+            if (method_exists($ph, 'uploadFile')) {
                 $ph->uploadFile($filename, $parent);
             }
         }
-		return (object) array('files' => $this -> getFiles($parent), 'file' => $filename);
-	}
-	
+        return (object)array('files' => $this->getFiles($parent), 'file' => $filename);
+    }
 
-	private function _sortFiles($a, $b) {
-		return strcmp(strtoupper($a -> filename), strtoupper($b -> filename));
-	}
+    /**
+     * Deletes all the thumbnails for the given path. Path is relative from UPLOADFOLDER
+     * @param string $file The filename
+     * @param string $path The folder in which the file remains
+     */
+    private function deleteThumbnails($file, $path)
+    {
+        $modes = unserialize(IMAGE_MODES);
+        foreach ($modes as $mode => $settings) {
+            $destpath = BASEPATH . 'images/' . $mode . '/' . UPLOADFOLDER . $path;
 
-	private function _sortFolders($a, $b) {
-		return strcmp(strtoupper($a -> label), strtoupper($b -> label));
-	}
-	
-	
+            if (file_exists($destpath . $file)) {
+                unlink($destpath . $file);
+            }
+        }
+    }
+
+    private function sortFiles($a, $b)
+    {
+        return strcmp(strtoupper($a->filename), strtoupper($b->filename));
+    }
+
+    private function sortFolders($a, $b)
+    {
+        return strcmp(strtoupper($a->label), strtoupper($b->label));
+    }
+
 }
