@@ -9,9 +9,22 @@ class Image
 
         $destination = BASEPATH . 'images' . DIRECTORY_SEPARATOR . $mode . DIRECTORY_SEPARATOR . $path . DIRECTORY_SEPARATOR;
 
+        $valid = [
+            'gif',
+            'png',
+            'jpg'
+        ];
+
+        // Apply extension to filename if it's different from the original image
+        if(array_key_exists('f', $settings) && in_array($settings['f'], $valid)) {
+            if(substr(strtolower($file), -3) !== strtolower($settings['f'])) {
+                $file .= ".{$settings['f']}";
+            }
+        }
+
         if (file_exists($destination . $file)) {
             // Do not regenerate
-            return;
+            return $destination . $file;
         }
 
         if (!is_dir($destination)) {
@@ -68,6 +81,8 @@ class Image
         }
 
         $quality = $settings['q'] ?? 90;
+
+
 
         $img->save($destination . $file, $quality);
 
