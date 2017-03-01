@@ -51,8 +51,9 @@ class Connection {
 											$port);
 		
 		if(!$this -> connection) {
-			if(!LIVESERVER)
-				echo "Cannot connect to database";
+			if(!LIVESERVER) {
+                echo "Cannot connect to database";
+            }
 			
 			exit;
 		}
@@ -64,7 +65,11 @@ class Connection {
 		mysqli_query($this->connection, 'SET NAMES utf8');
 		
 		if(!is_dir(dirname(__FILE__) . '/../logs')) {
-			@mkdir(dirname(__FILE__) . '/../logs');
+		    try {
+                @mkdir(dirname(__FILE__) . '/../logs');
+            } catch(Exception $e) {
+		        // Cannot log errors, directory not writable
+            }
 		}
 	}
 
@@ -305,9 +310,8 @@ class Connection {
 	}
 
 	/**
-	 * Writes a string to the logclass<br/>
+	 * Writes a string to the logfile<br/>
 	 * <b>debug.txt Needs to be writable!</b>
-	 * @param string statement The string to write;
 	 */
 	public function addTolog() {
 		$statements = func_get_args();
@@ -338,7 +342,7 @@ class Connection {
 	/**
 	 * Writes a string to the logclass<br/>
 	 * <b>404.log Needs to be writable!</b>
-	 * @param string statement The string to write;
+	 * @param $statement string The string to write;
 	 */
 	public function addTo404log($statement) {
 		if(!is_scalar($statement))
