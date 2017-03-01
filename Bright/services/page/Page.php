@@ -14,9 +14,9 @@
  */
 class Page extends Content {
 
-	function __construct() {
-		parent::__construct();
-	}
+    function __construct() {
+        parent::__construct();
+    }
 
     /**
      * Gets a page by it's id
@@ -25,16 +25,16 @@ class Page extends Content {
      * @param bool $tpllang
      * @return OPage The page
      */
-	public function getPageById($id, $useCount = false, $tpllang = false) {
-		if(!is_numeric($id))
-			return null;
+    public function getPageById($id, $useCount = false, $tpllang = false) {
+        if(!is_numeric($id))
+            return null;
 
-		$ucsql = '';
-		if($useCount) {
+        $ucsql = '';
+        if($useCount) {
             $ucsql = ', (SELECT COUNT(t.pageId) FROM tree t WHERE t.pageId = p.pageId) AS `usecount` ';
         }
 
-		$sql = "SELECT p.*,
+        $sql = "SELECT p.*,
 				it.lifetime as `lifetime`, 
 				it.label as `itemLabel`, 
 				UNIX_TIMESTAMP(p.publicationdate) as `publicationdate`, 
@@ -45,14 +45,14 @@ class Page extends Content {
 				FROM page p, itemtypes it 
 				WHERE p.itemType = it.itemId 
 				AND p.pageId=$id";
-		$page = $this -> conn -> getRow($sql, 'OPage');
+        $page = $this -> conn -> getRow($sql, 'OPage');
 
-		if(!$page)
-			return null;
+        if(!$page)
+            return null;
 
-		$page = $this -> getContent($page, $tpllang);
-		return $page;
-	}
+        $page = $this -> getContent($page, $tpllang);
+        return $page;
+    }
 
     /**
      * Gets all the backups for a page
@@ -61,80 +61,80 @@ class Page extends Content {
      * @throws Exception
      * @since 2.7 - 24 dec 2010
      */
-	public function getBackups($pageId) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function getBackups($pageId) {
+        if(!$this -> IS_AUTH)
+            throw $this -> throwException(1001);
 
-		if(!is_numeric($pageId))
-			throw $this -> throwException(2002);
+        if(!is_numeric($pageId))
+            throw $this -> throwException(2002);
 
-		$sql = 'SELECT content, UNIX_TIMESTAMP(`date`) as `date` FROM `backups` WHERE `pageId`=' . (int)$pageId . ' ORDER BY `date` DESC';
-		$backups = $this -> conn -> getRows($sql);
+        $sql = 'SELECT content, UNIX_TIMESTAMP(`date`) as `date` FROM `backups` WHERE `pageId`=' . (int)$pageId . ' ORDER BY `date` DESC';
+        $backups = $this -> conn -> getRows($sql);
 
-		$retarr = array();
-		foreach($backups as $backup) {
-			$retarr[] = (object) array('page' => unserialize($backup -> content), 'date' => $backup -> date);
-		}
-	}
+        $retarr = array();
+        foreach($backups as $backup) {
+            $retarr[] = (object) array('page' => unserialize($backup -> content), 'date' => $backup -> date);
+        }
+    }
 
-	/**
-	 * Gets a page by it's treeId
-	 * @param int $treeId The treeId of the page
-	 * @return OPage The page
-	 */
-	public function getPageByTreeId($treeId) {
-		if(!is_numeric($treeId))
-			return null;
+    /**
+     * Gets a page by it's treeId
+     * @param int $treeId The treeId of the page
+     * @return OPage The page
+     */
+    public function getPageByTreeId($treeId) {
+        if(!is_numeric($treeId))
+            return null;
 
-		$sql = 'SELECT pageId FROM tree WHERE treeId=' . $treeId;
-		$row = $this -> conn -> getRow($sql);
-		if(!$row)
-			return null;
+        $sql = 'SELECT pageId FROM tree WHERE treeId=' . $treeId;
+        $row = $this -> conn -> getRow($sql);
+        if(!$row)
+            return null;
 
-		return $this -> getPageById($row -> pageId);
-	}
+        return $this -> getPageById($row -> pageId);
+    }
 
-	/**
-	 * Gets all the pages of the specific type, whether they reside in the tree or not
-	 * @param string $itemType The name of the template
-	 * @return array An array of OPages
-	 */
-	public function getPagesByType($itemType) {
-		$sql = 'SELECT p.pageId, ' .
-				'p.itemType, ' .
-				'p.label, ' .
-				'it.lifetime as `lifetime`, ' .
-				'it.label as `itemLabel`, ' .
-				'UNIX_TIMESTAMP(p.modificationdate) as `modificationdate`, ' .
-				'UNIX_TIMESTAMP(p.publicationdate) as `publicationdate`, ' .
-				'UNIX_TIMESTAMP(p.expirationdate) as `expirationdate`, ' .
-				'p.alwayspublished, ' .
-				'p.showinnavigation ' .
-				'FROM page p, itemtypes it ' .
-				'WHERE p.itemType = it.itemId ' .
-				'AND it.label=\'' . Connection::getInstance() -> escape_string($itemType) . '\'';
-		$pages = $this -> conn -> getRows($sql, 'OPage');
+    /**
+     * Gets all the pages of the specific type, whether they reside in the tree or not
+     * @param string $itemType The name of the template
+     * @return array An array of OPages
+     */
+    public function getPagesByType($itemType) {
+        $sql = 'SELECT p.pageId, ' .
+            'p.itemType, ' .
+            'p.label, ' .
+            'it.lifetime as `lifetime`, ' .
+            'it.label as `itemLabel`, ' .
+            'UNIX_TIMESTAMP(p.modificationdate) as `modificationdate`, ' .
+            'UNIX_TIMESTAMP(p.publicationdate) as `publicationdate`, ' .
+            'UNIX_TIMESTAMP(p.expirationdate) as `expirationdate`, ' .
+            'p.alwayspublished, ' .
+            'p.showinnavigation ' .
+            'FROM page p, itemtypes it ' .
+            'WHERE p.itemType = it.itemId ' .
+            'AND it.label=\'' . Connection::getInstance() -> escape_string($itemType) . '\'';
+        $pages = $this -> conn -> getRows($sql, 'OPage');
 
-		if(!$pages)
-			return null;
+        if(!$pages)
+            return null;
 
-		foreach($pages as &$page)
-			$page = $this -> getContent($page);
+        foreach($pages as &$page)
+            $page = $this -> getContent($page);
 
-		return $pages;
-	}
+        return $pages;
+    }
 
-	/**
-	 * Gets all the pages of the specific type, whether they reside in the tree or not
-	 * @param int $templateId The id template
-	 * @return array An array of OPages
-	 */
-	public function getPagesByTemplateId($templateId) {
-		$templateId = (int)$templateId;
-		$c = new Cache();
-		$cname = 'pages-getPagesByTemplateId-' . $templateId;
-		$pages = $c -> getCache($cname);
-		$sql = "SELECT p.pageId, 
+    /**
+     * Gets all the pages of the specific type, whether they reside in the tree or not
+     * @param int $templateId The id template
+     * @return array An array of OPages
+     */
+    public function getPagesByTemplateId($templateId) {
+        $templateId = (int)$templateId;
+        $c = new Cache();
+        $cname = 'pages-getPagesByTemplateId-' . $templateId;
+        $pages = $c -> getCache($cname);
+        $sql = "SELECT p.pageId, 
 				p.itemType, 
 				p.label, 
 				it.lifetime as `lifetime`, 
@@ -146,28 +146,28 @@ class Page extends Content {
 				p.showinnavigation 
 				FROM page p, itemtypes it 
 				WHERE p.itemType = $templateId AND p.itemType = it.itemId";
-		
-		$pages = $this -> conn -> getRows($sql, 'OPage');
 
-		if(!$pages)
-			return null;
+        $pages = $this -> conn -> getRows($sql, 'OPage');
 
-		foreach($pages as &$page)
-			$page = $this -> getContent($page);
+        if(!$pages)
+            return null;
 
-		$c -> setCache($pages, $cname, strtotime('+1 year'));
-		return $pages;
-	}
+        foreach($pages as &$page)
+            $page = $this -> getContent($page);
 
-	/**
-	 * Gets a page by it's unique label<br/>
-	 * This method does not check whether the page is actually in the tree
-	 * @param string $label The label of the page
-	 * @return OPage The Page with the label $label
-	 */
-	public function getPageByLabel($label) {
-		$label = Connection::getInstance() -> escape_string($label);
-		$sql = "SELECT p.pageId,
+        $c -> setCache($pages, $cname, strtotime('+1 year'));
+        return $pages;
+    }
+
+    /**
+     * Gets a page by it's unique label<br/>
+     * This method does not check whether the page is actually in the tree
+     * @param string $label The label of the page
+     * @return OPage The Page with the label $label
+     */
+    public function getPageByLabel($label) {
+        $label = Connection::getInstance() -> escape_string($label);
+        $sql = "SELECT p.pageId,
 				p.itemType,
 				p.label,
 				it.lifetime as `lifetime`,
@@ -181,14 +181,14 @@ class Page extends Content {
 				WHERE p.itemType = it.itemId
 				AND p.label='$label'";
 
-		$page = $this -> conn -> getRow($sql, 'OPage');
+        $page = $this -> conn -> getRow($sql, 'OPage');
 
-		if(!$page)
-			return null;
+        if(!$page)
+            return null;
 
-		$page = $this -> getContent($page);
-		return $page;
-	}
+        $page = $this -> getContent($page);
+        return $page;
+    }
 
     /**
      * Gets a list of all pages<br/>
@@ -202,14 +202,14 @@ class Page extends Content {
      * @return array An array of pages
      * @throws Exception
      */
-	public function getPages($templateType = 0, $additionalFields = null, $updatesOnly = false) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function getPages($templateType = 0, $additionalFields = null, $updatesOnly = false) {
+        if(!$this -> IS_AUTH)
+            throw $this -> throwException(1001);
 
-		if(!is_numeric($templateType))
-			throw $this -> throwException(2002);
+        if(!is_numeric($templateType))
+            throw $this -> throwException(2002);
 
-		$sql = 'SELECT p.pageId,
+        $sql = 'SELECT p.pageId,
 				p.itemType,
 				p.label,
 				it.lifetime as `lifetime`,
@@ -220,70 +220,70 @@ class Page extends Content {
 				p.alwayspublished,
 				p.showinnavigation,
 				(SELECT COUNT(t.pageId) FROM tree t WHERE t.pageId = p.pageId) AS `usecount` ';
-		if($additionalFields == null) {
-			$settings = $this -> getSettings();
-			if($settings) {
-				if($settings !== null && isset($settings -> page) && isset($settings -> page -> visibleColumns)) {
-					$additionalFields = array();
-					foreach($settings -> page -> visibleColumns as $col) {
-						if(!in_array($col, Config::$pageColumns) || $col == 'title') {
-							$additionalFields[] = $col;
-						}
-					}
-						
-				}
-			}
-		}
-		if($additionalFields != null) {
-			$lang = explode(',',AVAILABLELANG);
-			$lang = array_shift($lang);
-			$fields = array();
-			$joins = array();
-			foreach($additionalFields as $field) {
-				$field = Connection::getInstance() -> escape_string($field);
-				$fields[] = " COALESCE(co{$field}.value, '') as `{$field}` ";
-				$joins[] = "LEFT JOIN content co{$field} ON p.pageId = co{$field}.pageId AND co{$field}.`lang`='$lang' AND co{$field}.`field`='{$field}' ";
-			}
-			$sql .= ', ' . join(', ', $fields);
-			$sql .= 'FROM page p ';
-			$sql .= join('', $joins);
-		} else {
-			
-			$sql .= 'FROM page p ';
-		}
+        if($additionalFields == null) {
+            $settings = $this -> getSettings();
+            if($settings) {
+                if($settings !== null && isset($settings -> page) && isset($settings -> page -> visibleColumns)) {
+                    $additionalFields = array();
+                    foreach($settings -> page -> visibleColumns as $col) {
+                        if(!in_array($col, Config::$pageColumns) || $col == 'title') {
+                            $additionalFields[] = $col;
+                        }
+                    }
 
-		$sql .= 'INNER JOIN itemtypes it ON p.itemType = it.itemId AND it.templatetype = ' . $templateType;
+                }
+            }
+        }
+        if($additionalFields != null) {
+            $lang = explode(',',AVAILABLELANG);
+            $lang = array_shift($lang);
+            $fields = array();
+            $joins = array();
+            foreach($additionalFields as $field) {
+                $field = Connection::getInstance() -> escape_string($field);
+                $fields[] = " COALESCE(co{$field}.value, '') as `{$field}` ";
+                $joins[] = "LEFT JOIN content co{$field} ON p.pageId = co{$field}.pageId AND co{$field}.`lang`='$lang' AND co{$field}.`field`='{$field}' ";
+            }
+            $sql .= ', ' . join(', ', $fields);
+            $sql .= 'FROM page p ';
+            $sql .= join('', $joins);
+        } else {
 
-		if($updatesOnly &&  isset($_SESSION['lastpagesupdate' . $templateType]) &&  $_SESSION['lastpagesupdate' . $templateType] != '') {
-			$sql .= ' WHERE UNIX_TIMESTAMP(p.modificationdate) > ' . $_SESSION['lastpagesupdate' . $templateType] . ' ';
-		}
+            $sql .= 'FROM page p ';
+        }
 
-		$sql .=	' ORDER BY p.modificationdate DESC';
+        $sql .= 'INNER JOIN itemtypes it ON p.itemType = it.itemId AND it.templatetype = ' . $templateType;
 
-		$_SESSION['lastpagesupdate' . $templateType] = time();
-		$type = 'OPage';
-		switch($templateType) {
-			case 3:
-				$type='OCalendarEvent';
-				break;
-		}
-		$rows = $this -> conn -> getRows($sql, $type);
+        if($updatesOnly &&  isset($_SESSION['lastpagesupdate' . $templateType]) &&  $_SESSION['lastpagesupdate' . $templateType] != '') {
+            $sql .= ' WHERE UNIX_TIMESTAMP(p.modificationdate) > ' . $_SESSION['lastpagesupdate' . $templateType] . ' ';
+        }
 
-		return $rows;
-	}
+        $sql .=	' ORDER BY p.modificationdate DESC';
 
-	/**
-	 * Gets all the updated pages since the last request
-	 * Since 2.3 it uses the getPages method
-	 * @since 2.1 - 18 feb 2010
-	 *
-	 */
-	public function getUpdatedPages() {
-		if(defined('ADDITIONALOVERVIEWFIELDS') && ADDITIONALOVERVIEWFIELDS != null)
-			return $this -> getPages(0, explode(',', ADDITIONALOVERVIEWFIELDS), true);
+        $_SESSION['lastpagesupdate' . $templateType] = time();
+        $type = 'OPage';
+        switch($templateType) {
+            case 3:
+                $type='OCalendarEvent';
+                break;
+        }
+        $rows = $this -> conn -> getRows($sql, $type);
 
-		return $this -> getPages(0, null, true);
-	}
+        return $rows;
+    }
+
+    /**
+     * Gets all the updated pages since the last request
+     * Since 2.3 it uses the getPages method
+     * @since 2.1 - 18 feb 2010
+     *
+     */
+    public function getUpdatedPages() {
+        if(defined('ADDITIONALOVERVIEWFIELDS') && ADDITIONALOVERVIEWFIELDS != null)
+            return $this -> getPages(0, explode(',', ADDITIONALOVERVIEWFIELDS), true);
+
+        return $this -> getPages(0, null, true);
+    }
 
     /**
      * Gets an array of pages based on their ID
@@ -292,16 +292,16 @@ class Page extends Content {
      * @return array an array of OPages (without content)
      * @throws Exception
      */
-	public function getPagesByIds($ids, $includeContent = false) {
-		if(!is_array($ids))
-			throw $this -> throwException(2007);
+    public function getPagesByIds($ids, $includeContent = false) {
+        if(!is_array($ids))
+            throw $this -> throwException(2007);
 
-		foreach($ids as $id) {
-			if(!is_numeric($id))
-				throw $this -> throwException(2002);
-		}
+        foreach($ids as $id) {
+            if(!is_numeric($id))
+                throw $this -> throwException(2002);
+        }
 
-		$sql = 'SELECT p.pageId,
+        $sql = 'SELECT p.pageId,
 				p.itemType,
 				p.label,
 				it.lifetime as `lifetime`,
@@ -317,17 +317,17 @@ class Page extends Content {
 				WHERE pageId IN (' . join(',', $ids) .')';
 
 
-		$sql .=	'ORDER BY p.modificationdate DESC';
+        $sql .=	'ORDER BY p.modificationdate DESC';
 
-		$rows = $this -> conn -> getRows($sql, 'OPage');
-		if(!$includeContent)
-			return $rows;
+        $rows = $this -> conn -> getRows($sql, 'OPage');
+        if(!$includeContent)
+            return $rows;
 
-		foreach($rows as $page) {
-			$page = $this -> getContent($page);
-		}
-		return $rows;
-	}
+        foreach($rows as $page) {
+            $page = $this -> getContent($page);
+        }
+        return $rows;
+    }
 
     /**
      * Creates or updates a page<br/>
@@ -342,37 +342,37 @@ class Page extends Content {
      * @return OPage The created or updated page
      * @throws Exception
      */
-	public function setPage(OPage $page, $returnAll = true, $executeHook = true) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		$ph = null;
-		$cache = new Cache();
-		$cache -> deleteCacheByPrefix('pages');
-		if($executeHook && class_exists('PageHook')) {
-			$ph = new PageHook();
-			if(method_exists($ph, 'preSetPage'))
-				$page = $ph -> preSetPage($page);
-		}
+    public function setPage(OPage $page, $returnAll = true, $executeHook = true) {
+        if(!$this -> IS_AUTH)
+            throw $this -> throwException(1001);
+        $ph = null;
+        $cache = new Cache();
+        $cache -> deleteCacheByPrefix('pages');
+        if($executeHook && class_exists('PageHook')) {
+            $ph = new PageHook();
+            if(method_exists($ph, 'preSetPage'))
+                $page = $ph -> preSetPage($page);
+        }
 
-		$p = null;
-		if($page -> pageId == 0) {
-			// New Page
-			$p = $this -> _createPage($page);
-		} else {
-			$cache -> deleteCacheByLabel($page -> label);
-			$p = $this -> _updatePage($page);
-		}
+        $p = null;
+        if($page -> pageId == 0) {
+            // New Page
+            $p = $this -> _createPage($page);
+        } else {
+            $cache -> deleteCacheByLabel($page -> label);
+            $p = $this -> _updatePage($page);
+        }
 
-		if($ph != null && method_exists($ph, 'postSetPage')) {
-			$ph -> postSetPage($page);
-		}
+        if($ph != null && method_exists($ph, 'postSetPage')) {
+            $ph -> postSetPage($page);
+        }
 
-		if($returnAll) {
-			return $this -> getUpdatedPages();
-		}
+        if($returnAll) {
+            return $this -> getUpdatedPages();
+        }
 
-		return $p;
-	}
+        return $p;
+    }
 
     /**
      * Deletes a page<br/>
@@ -385,36 +385,36 @@ class Page extends Content {
      * @return bool True when successful
      * @throws Exception
      */
-	public function deletePage($id) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		if(!$this -> DELETE_PAGE)
-			throw $this -> throwException( 5001);
+    public function deletePage($id) {
+        if(!$this -> IS_AUTH)
+            throw $this -> throwException(1001);
+        if(!$this -> DELETE_PAGE)
+            throw $this -> throwException( 5001);
 
-		if(!is_numeric($id))
-			throw $this -> throwException( 2002);
-		
-		$cache = new Cache();
-		$cache -> deleteCacheByPrefix('pages');
-		
-		//First check if the page is present in the tree.
-		$sql = 'SELECT `treeId` FROM tree WHERE `pageId`=' . (int) $id;
-		$tids = $this -> conn -> getFields($sql);
-		if(count($tids) > 0) {
-			$tree = new Tree();
-			$paths = array();
-			foreach($tids as $tid) {
-				$paths[] = $tree -> getPath($tid);
-			}
-			throw $this -> throwException( 5003, array(join("\n- ", $paths)));
-		}
+        if(!is_numeric($id))
+            throw $this -> throwException( 2002);
 
-		$sql = 'DELETE FROM `page` WHERE `pageId` = ' . (int) $id;
-		$this -> conn -> deleteRow($sql);
-		$sql = 'DELETE FROM `content` WHERE `pageId` = ' . (int) $id;
-		$this -> conn -> deleteRow($sql);
-		return true;
-	}
+        $cache = new Cache();
+        $cache -> deleteCacheByPrefix('pages');
+
+        //First check if the page is present in the tree.
+        $sql = 'SELECT `treeId` FROM tree WHERE `pageId`=' . (int) $id;
+        $tids = $this -> conn -> getFields($sql);
+        if(count($tids) > 0) {
+            $tree = new Tree();
+            $paths = array();
+            foreach($tids as $tid) {
+                $paths[] = $tree -> getPath($tid);
+            }
+            throw $this -> throwException( 5003, array(join("\n- ", $paths)));
+        }
+
+        $sql = 'DELETE FROM `page` WHERE `pageId` = ' . (int) $id;
+        $this -> conn -> deleteRow($sql);
+        $sql = 'DELETE FROM `content` WHERE `pageId` = ' . (int) $id;
+        $this -> conn -> deleteRow($sql);
+        return true;
+    }
 
     /**
      * Deletes  multiple pages<br/>
@@ -427,17 +427,17 @@ class Page extends Content {
      * @return bool True when successfull
      * @throws Exception
      */
-	public function deletePages($ids) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		if(!$this -> DELETE_PAGE)
-			throw $this -> throwException( 5001);
+    public function deletePages($ids) {
+        if(!$this -> IS_AUTH)
+            throw $this -> throwException(1001);
+        if(!$this -> DELETE_PAGE)
+            throw $this -> throwException( 5001);
 
-		foreach($ids as $id) {
-			$this -> deletePage($id);
-		}
-		return true;
-	}
+        foreach($ids as $id) {
+            $this -> deletePage($id);
+        }
+        return true;
+    }
 
     /**
      * A simple search mechanism
@@ -450,27 +450,27 @@ class Page extends Content {
      * @param bool $published
      * @return array An array of pages with content matching $query
      */
-	public function search($query, $offset = 0, $limit = 10, $idsOnly = false, $published = false) {
-		// Replace comma's by spaces
-		$query = str_replace(',', ' ', $query);
+    public function search($query, $offset = 0, $limit = 10, $idsOnly = false, $published = false) {
+        // Replace comma's by spaces
+        $query = str_replace(',', ' ', $query);
 
-		$inTree = '';
+        $inTree = '';
 
-		if(!$idsOnly) {
-			$inTree = ' AND p.pageId IN (SELECT pageId FROM tree) ';
-		}
-		$pubstr = '';
-		if($published) {
-			$pubstr = ' AND (p.alwayspublished = 1 OR (publicationdate < NOW() AND expirationdate > NOW())) ';
-		}
-		$query = Connection::getInstance() -> escape_string($query);
+        if(!$idsOnly) {
+            $inTree = ' AND p.pageId IN (SELECT pageId FROM tree) ';
+        }
+        $pubstr = '';
+        if($published) {
+            $pubstr = ' AND (p.alwayspublished = 1 OR (publicationdate < NOW() AND expirationdate > NOW())) ';
+        }
+        $query = Connection::getInstance() -> escape_string($query);
 
-		$bmode = '';
-		if(strstr($query, '-')) {
-			$bmode = " IN BOOLEAN MODE";
-			$query = '"' . $query . '"';
-		}
-		$sql = "SELECT SQL_CALC_FOUND_ROWS p.pageId,
+        $bmode = '';
+        if(strstr($query, '-')) {
+            $bmode = " IN BOOLEAN MODE";
+            $query = '"' . $query . '"';
+        }
+        $sql = "SELECT SQL_CALC_FOUND_ROWS DISTINCT(p.pageId),
 			p.itemType,
 			p.label,
 			it.lifetime as `lifetime`,
@@ -489,47 +489,46 @@ class Page extends Content {
 			$pubstr
 			AND p.pageId = c.pageId
 			AND c.searchable = 1 $inTree
-			GROUP BY p.pageId
 			ORDER BY rel DESC ";
 
-		if($limit > 0)
-			$sql .= 'LIMIT ' . $offset . ',' . $limit;
+        if($limit > 0)
+            $sql .= 'LIMIT ' . $offset . ',' . $limit;
 
-		if($idsOnly)
-			return $this -> conn -> getFields($sql);
+        if($idsOnly)
+            return $this -> conn -> getFields($sql);
 
-		$result = $this -> conn -> getRows($sql, 'OPage');
-		if(count($result) == 0)
-			return null;
+        $result = $this -> conn -> getRows($sql, 'OPage');
+        if(count($result) == 0)
+            return null;
 
-		$numresults = $this -> conn -> getField('SELECT FOUND_ROWS()');
+        $numresults = $this -> conn -> getField('SELECT FOUND_ROWS()');
 
-		$tree = new Tree();
-		$resultobj = new StdClass();
-		$resultobj -> page = $offset / $limit;
-		$resultobj -> total = $numresults;
-		$resultobj -> results = $tree -> getNodesByPageIds($result);
-		return $resultobj;
-	}
+        $tree = new Tree();
+        $resultobj = new StdClass();
+        $resultobj -> page = $offset / $limit;
+        $resultobj -> total = $numresults;
+        $resultobj -> results = $tree -> getNodesByPageIds($result);
+        return $resultobj;
+    }
 
-	/**
-	 * Creates a page
-	 * @param OPage $page The page to create
-	 * @return OPage The created page
-	 */
-	private function _createPage(OPage $page) {
-		$ap = ($page -> alwayspublished) ? 1 : 0;
-		$sn = ($page -> showinnavigation) ? 1 : 0;
-		
-		if(isset($_SESSION['administratorId'])) {
-			$page -> createdby = $_SESSION['administratorId'];
-		} else {
-			$page -> createdby = 0;
-			
-		}
-		BrightUtils::forceInt($page, array('publicationdate', 'expirationdate', 'itemType', 'createdby'));
-		$page -> label = Connection::getInstance() -> escape_string($this-> generateLabel($page -> label));
-		$sql = "INSERT INTO page (itemType, label, publicationdate, expirationdate, alwayspublished, showinnavigation, creationdate, createdby)
+    /**
+     * Creates a page
+     * @param OPage $page The page to create
+     * @return OPage The created page
+     */
+    private function _createPage(OPage $page) {
+        $ap = ($page -> alwayspublished) ? 1 : 0;
+        $sn = ($page -> showinnavigation) ? 1 : 0;
+
+        if(isset($_SESSION['administratorId'])) {
+            $page -> createdby = $_SESSION['administratorId'];
+        } else {
+            $page -> createdby = 0;
+
+        }
+        BrightUtils::forceInt($page, array('publicationdate', 'expirationdate', 'itemType', 'createdby'));
+        $page -> label = Connection::getInstance() -> escape_string($this-> generateLabel($page -> label));
+        $sql = "INSERT INTO page (itemType, label, publicationdate, expirationdate, alwayspublished, showinnavigation, creationdate, createdby)
 				VALUES 
 				({$page -> itemType}, 
 				'{$page -> label}', 
@@ -539,28 +538,28 @@ class Page extends Content {
 				$sn,
 				NOW(),
 				{$page -> createdby})";
-		$id = $this -> conn -> insertRow($sql);
-		$page -> pageId = $id;
-		$this -> setContent($page);
-		return $this -> getPageById($page -> pageId);
-	}
+        $id = $this -> conn -> insertRow($sql);
+        $page -> pageId = $id;
+        $this -> setContent($page);
+        return $this -> getPageById($page -> pageId);
+    }
 
-	/**
-	 * Updates a page
-	 * @param OPage page The page to update
-	 * @return OPage The updated page
-	 */
-	private function _updatePage(OPage $page) {
+    /**
+     * Updates a page
+     * @param OPage page The page to update
+     * @return OPage The updated page
+     */
+    private function _updatePage(OPage $page) {
 
-		$ap = ($page -> alwayspublished) ? 1 : 0;
-		$sn = ($page -> showinnavigation) ? 1 : 0;
-		$cachebleChanged = $this -> _cachebleChanged($page);
-		
-		$page -> label = Connection::getInstance() -> escape_string($this-> generateLabel($page -> label, $page -> pageId));
-		$page -> modifiedby = isset($_SESSION['administratorId']) ? $_SESSION['administratorId'] : 0;
-		BrightUtils::forceInt($page, array('publicationdate', 'expirationdate', 'itemType', 'pageId'));
-		
-		$sql = "UPDATE page 
+        $ap = ($page -> alwayspublished) ? 1 : 0;
+        $sn = ($page -> showinnavigation) ? 1 : 0;
+        $cachebleChanged = $this -> _cachebleChanged($page);
+
+        $page -> label = Connection::getInstance() -> escape_string($this-> generateLabel($page -> label, $page -> pageId));
+        $page -> modifiedby = isset($_SESSION['administratorId']) ? $_SESSION['administratorId'] : 0;
+        BrightUtils::forceInt($page, array('publicationdate', 'expirationdate', 'itemType', 'pageId'));
+
+        $sql = "UPDATE page 
 				SET label='{$page -> label}',
 				itemType='{$page -> itemType}', 
 				publicationdate=FROM_UNIXTIME({$page -> publicationdate}),
@@ -570,18 +569,18 @@ class Page extends Content {
 				modificationdate=NOW(),
 				modifiedby={$page -> modifiedby}
 				WHERE pageId={$page -> pageId}";
-		$this -> conn -> updateRow($sql);
-		$this -> setContent($page);
+        $this -> conn -> updateRow($sql);
+        $this -> setContent($page);
 
-		if($cachebleChanged) {
-			// Flush cache
-			$cache = new Cache();
-			$cache -> flushCache();
-			$tree = new Tree();
-			$tree -> generateSitemap();
-		}
-		return $this -> getPageById($page -> pageId, true);
-	}
+        if($cachebleChanged) {
+            // Flush cache
+            $cache = new Cache();
+            $cache -> flushCache();
+            $tree = new Tree();
+            $tree -> generateSitemap();
+        }
+        return $this -> getPageById($page -> pageId, true);
+    }
 
     /**
      * Checks if a label is changed
@@ -589,12 +588,12 @@ class Page extends Content {
      * @return bool true when the label is different and the page is present in the navigationtree
      * @throws Exception
      */
-	private function _cachebleChanged($page) {
+    private function _cachebleChanged($page) {
 
-		if(!is_numeric($page -> pageId))
-			throw $this -> throwException(2002);
+        if(!is_numeric($page -> pageId))
+            throw $this -> throwException(2002);
 
-		$sql = 'SELECT COUNT(p.pageId)
+        $sql = 'SELECT COUNT(p.pageId)
 				FROM `page` p
 				RIGHT JOIN tree t ON t.pageId=p.pageId
 				WHERE p.pageId=' . $page -> pageId . '
@@ -604,8 +603,8 @@ class Page extends Content {
 				OR UNIX_TIMESTAMP(`publicationdate`) <> '. (int) $page -> publicationdate .'
 				OR UNIX_TIMESTAMP(`expirationdate`) <> '. (int) $page -> expirationdate .')';
 
-		$res = $this -> conn -> getField($sql);
+        $res = $this -> conn -> getField($sql);
 
-		return ((int)$res > 0);
-	}
+        return ((int)$res > 0);
+    }
 }
