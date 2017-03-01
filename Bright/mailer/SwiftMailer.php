@@ -56,7 +56,7 @@ class SwiftMailer implements IMailer
      * @param string $subject The e-mails subject
      * @param string $message The message to send
      * @param array $replacements An array of replacements
-     * @throws Exception
+     * @throws \Exception
      * @todo Describe replacements;
      */
     public function sendMassMail($from, $to, $subject, $message, $replacements = null)
@@ -68,16 +68,16 @@ class SwiftMailer implements IMailer
 
         $transport = null;
         if (defined('TRANSPORT') && TRANSPORT == 'smtp') {
-            $transport = Swift_SmtpTransport::newInstance(SMTP, SMTPPORT);
+            $transport = \Swift_SmtpTransport::newInstance(SMTP, SMTPPORT);
         } else if (TRANSPORT == 'sendmail') {
-            $transport = Swift_SendmailTransport::newInstance();
+            $transport = \Swift_SendmailTransport::newInstance();
         } else {
-            $transport = Swift_MailTransport::newInstance();
+            $transport = \Swift_MailTransport::newInstance();
         }
 
-        $mailer = Swift_Mailer::newInstance($transport);
-        $mailer->registerPlugin(new Swift_Plugins_ThrottlerPlugin(50, Swift_Plugins_ThrottlerPlugin::MESSAGES_PER_MINUTE));
-        $mailer->registerPlugin(new Swift_Plugins_AntiFloodPlugin(100, 30));
+        $mailer = \Swift_Mailer::newInstance($transport);
+        $mailer->registerPlugin(new \Swift_Plugins_ThrottlerPlugin(50, \Swift_Plugins_ThrottlerPlugin::MESSAGES_PER_MINUTE));
+        $mailer->registerPlugin(new \Swift_Plugins_AntiFloodPlugin(100, 30));
 
         $plain = $message;
         $plain = str_replace('</p>', "\r\n", $plain);
@@ -86,19 +86,19 @@ class SwiftMailer implements IMailer
         $plain = str_replace('<BR>', "\r\n", $plain);
         $plain = strip_tags($plain);
 
-        $msg = Swift_Message::newInstance();
+        $msg = \Swift_Message::newInstance();
 
         //Give the message a subject
         $msg->setSubject($subject)
             ->setMaxLineLength(1000)
             ->setFrom($from)
             ->setReturnPath(MAILINGBOUNCE)
-            ->setEncoder(Swift_Encoding::get8BitEncoding())
+            ->setEncoder(\Swift_Encoding::get8BitEncoding())
             ->setBody($message, 'text/html')
             ->addPart($plain, 'text/plain');
 
         if ($replacements) {
-            $decorator = new Swift_Plugins_DecoratorPlugin($replacements);
+            $decorator = new \Swift_Plugins_DecoratorPlugin($replacements);
             $mailer->registerPlugin($decorator);
         }
 
@@ -215,17 +215,17 @@ class SwiftMailer implements IMailer
 
         $transport = null;
         if (defined('TRANSPORT') && TRANSPORT == 'smtp') {
-            $transport = Swift_SmtpTransport::newInstance(SMTP, SMTPPORT);
+            $transport = \Swift_SmtpTransport::newInstance(SMTP, SMTPPORT);
         } else if (defined('TRANSPORT') && TRANSPORT == 'sendmail') {
-            $transport = Swift_SendmailTransport::newInstance();
+            $transport = \Swift_SendmailTransport::newInstance();
         } else {
-            $transport = Swift_MailTransport::newInstance();
+            $transport = \Swift_MailTransport::newInstance();
         }
 
-        $mailer = Swift_Mailer::newInstance($transport);
+        $mailer = \Swift_Mailer::newInstance($transport);
 
 
-        $msg = Swift_Message::newInstance();
+        $msg = \Swift_Message::newInstance();
 
         //Give the message a subject
         $msg->setSubject($subject)
@@ -241,7 +241,7 @@ class SwiftMailer implements IMailer
 
 
         if ($messageHtml != null) {
-            $msg->setEncoder(Swift_Encoding::get8BitEncoding());
+            $msg->setEncoder(\Swift_Encoding::get8BitEncoding());
             $msg->setBody($messageHtml, 'text/html');
         }
         if ($messagePlain != null && $messagePlain != false) {
@@ -266,11 +266,11 @@ class SwiftMailer implements IMailer
 
             foreach ($attachments as $att) {
                 if (is_string($att) && file_exists($att)) {
-                    $msg->attach(Swift_Attachment::fromPath($att));
-                } else if ($att instanceof Swift_Attachment) {
+                    $msg->attach(\Swift_Attachment::fromPath($att));
+                } else if ($att instanceof \Swift_Attachment) {
                     $msg->attach($att);
                 } else if ($this->checkAttachment($att)) {
-                    $msg->attach(Swift_Attachment::newInstance(
+                    $msg->attach(\Swift_Attachment::newInstance(
                         $att['content'],
                         $att['Filename'],
                         $att['Content-type']
