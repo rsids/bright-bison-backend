@@ -1,4 +1,5 @@
 <?php
+namespace Bright\utils;
 /**
  * This class does some arbitrary work to prevent some basic vulnerabilities
  * in PHP and / or libraries.

@@ -1,57 +1,60 @@
 <?php
 
-/**
- * The Files class manages the files uploaded by the user.
- * Version history:
- * 2.4 20120411
- * - Added FTP functionality for deleting folders
- * 2.3 20120207
- * - Added deleteFiles
- * - Added exifdata & iptc data
- * 2.2 20120125
- * - Uploadfolder is created if not existent
- * @author Ids Klijnsma - Fur
- * @copyright Copyright &copy; 2010 - 2012, Fur
- * @version 2.4
- * @package Bright
- * @subpackage files
- */
-class Files extends Permissions
+namespace Bright\filesystem;
+
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+
+use Aws\Credentials\CredentialProvider;
+use Aws\Exception\AwsException;
+use Aws\S3\S3Client;
+use Bright\interfaces\IFileSystem;
+
+class AWS implements IFileSystem
 {
 
-    /**
-     * @var StdClass Object holding the paths and folders of the userfiles
-     */
-    private $filesettings;
-
-    /**
-     * @var StdClass Holds the Connection singleton
-     */
-    private $_conn;
-
-    private $filesystem;
+    private $s3;
 
     function __construct()
     {
-        parent::__construct();
-        $this->IS_AUTH = true;
-        $cfg = new Config();
-        $this->filesettings = $cfg->getFileSettings();
-
-        if(FILESYSTEM === BaseConstants::FILESYSTEM_LOCAL) {
-            $this->filesystem = new \Bright\filesystem\Local();
-        } else if(FILESYSTEM === BaseConstants::FILESYSTEM_AWS) {
-            $this->filesystem = new \Bright\filesystem\AWS();
+        if(!class_exists('\Aws\S3\S3Client')) {
+            throw new \Exception("Class Aws\S3\S3Client not found, install it via `composer require aws/aws-sdk-php`");
         }
-    }
 
-    /**
-     * Gets the filesettings
-     * @return StdClass Object holding the paths and folders of the userfiles
-     */
-    public function getConfig()
-    {
-        return $this->filesettings;
+//        $provider = CredentialProvider::ini('production', BASEPATH . 'bright/site/config/aws.ini');
+//        $provider = CredentialProvider::memoize($provider);
+
+        $bucket = AWS_BUCKET;
+
+        $this->s3 = new S3Client([
+            'version' => 'latest',
+            'region' => 'eu-central-1',
+            'credentials' => [
+                'key' => AWS_KEY,
+                'secret' => AWS_SECRET
+            ]
+        ]);
+
+        try {
+            $result = $this->s3->putBucketCors([
+                'Bucket' => $bucket,
+                'CORSConfiguration' => [ // REQUIRED
+                    'CORSRules' => [ // REQUIRED
+                        [
+                            'AllowedHeaders' => ['Authorization'],
+                            'AllowedMethods' => ['POST', 'GET', 'PUT'], // REQUIRED
+                            'AllowedOrigins' => ['*'], // REQUIRED
+                            'ExposeHeaders' => [],
+                            'MaxAgeSeconds' => 3000
+                        ],
+                    ],
+                ]
+            ]);
+            error_log(var_export($result, true));
+        } catch (AwsException $e) {
+            // output error message if fails
+            error_log($e->getMessage());
+        }
     }
 
     /**
@@ -62,7 +65,7 @@ class Files extends Permissions
      */
     public function getProperties($file)
     {
-        return $this->filesystem->getProperties($file);
+        // TODO: Implement getProperties() method.
     }
 
     /**
@@ -73,11 +76,11 @@ class Files extends Permissions
      * </ul>
      * @param string $dir The parent directory, relative to the filepath specified in config.ini
      * @return array An array of directories (OFolders)
-     * @throws Exception
+     * @throws \Exception
      */
     public function getSubFolders($dir = '')
     {
-        return $this->filesystem->getSubFolders($dir);
+        // TODO: Implement getSubFolders() method.
     }
 
     /**
@@ -87,11 +90,11 @@ class Files extends Permissions
      * <li>IS_AUTH</li>
      * </ul>
      * @return array A multi-dimensional array of OFolders
-     * @throws Exception
+     * @throws \Exception
      */
     public function getStructure()
     {
-        return $this->getStructure();
+        // TODO: Implement getStructure() method.
     }
 
     /**
@@ -102,11 +105,11 @@ class Files extends Permissions
      * @param bool $extended
      * @param null $include_ext
      * @return array An array of files
-     * @throws Exception
+     * @throws \Exception
      */
     public function getFiles($dir = '', $returnThumbs = true, $exclude_ext = null, $extended = false, $include_ext = null)
     {
-        return $this->filesystem->getFiles($dir, $returnThumbs, $exclude_ext, $extended, $include_ext);
+        // TODO: Implement getFiles() method.
     }
 
     /**
@@ -118,11 +121,11 @@ class Files extends Permissions
      * @param string $folderName The name of the folder to create
      * @param string $dir The path of the parentfolder, relative to the base folder specified in the config.ini
      * @return array An array of folders, which are the subfolders of $dir
-     * @throws Exception
+     * @throws \Exception
      */
     public function createFolder($folderName, $dir)
     {
-        return $this->filesystem->createFolder($folderName, $dir);
+        // TODO: Implement createFolder() method.
     }
 
     /**
@@ -134,13 +137,12 @@ class Files extends Permissions
      * @param string $folderName The name of directory to delete
      * @param string $parent The directory in which the dir to delete is located, relative to the base folder specified in the config.ini
      * @return array The sub-dirs of $parent
-     * @throws Exception
+     * @throws \Exception
      */
     public function deleteFolder($folderName, $parent)
     {
-        return $this->filesystem->deleteFolder($folderName, $parent);
+        // TODO: Implement deleteFolder() method.
     }
-
 
     /**
      * Moves a file from oldpath to newpath<br/>
@@ -152,12 +154,11 @@ class Files extends Permissions
      * @param string $newPath The target directory, relative to the base folder specified in the config.ini
      * @param string $filename The file to move
      * @return array The contents of oldpath
-     * @throws Exception
+     * @throws \Exception
      */
     public function moveFile($oldPath, $newPath, $filename)
     {
-        return $this->filesystem->moveFile($oldPath, $newPath, $filename);
-
+        // TODO: Implement moveFile() method.
     }
 
     /**
@@ -171,16 +172,16 @@ class Files extends Permissions
      * @param string $dir The path of the file, relative to the base folder specified in the config.ini
      * @param boolean $throwNotExistsException When true, an exception is thrown when the specified file does not exist
      * @return array An array of files, which are in $path
-     * @throws Exception
+     * @throws \Exception
      */
     public function deleteFile($filename, $dir, $throwNotExistsException = false)
     {
-        return $this->filesystem->deleteFile($filename, $dir, $throwNotExistsException);
+        // TODO: Implement deleteFile() method.
     }
 
     public function deleteFiles($files, $path)
     {
-        return $this->filesystem->deleteFiles($files, $path);
+        // TODO: Implement deleteFiles() method.
     }
 
     /**
@@ -189,10 +190,10 @@ class Files extends Permissions
      * @param string $filename The filename on the local server
      * @param string $parent The parent folder
      * @return object
-     * @throws Exception
+     * @throws \Exception
      */
     public function uploadFromUrl($url, $filename, $parent)
     {
-        return $this->filesystem->uploadFromUrl($url, $filename, $parent);
+        // TODO: Implement uploadFromUrl() method.
     }
 }

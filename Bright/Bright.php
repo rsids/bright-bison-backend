@@ -60,7 +60,7 @@ class BrightAutoloader {
 
 		if($classPath[0] == 'Bright' && file_exists(BASEPATH . 'bright/library/' . join(DIRECTORY_SEPARATOR, $classPath) . '.php')) {
 			include BASEPATH . 'bright/library/' . join(DIRECTORY_SEPARATOR, $classPath) . '.php';
-			return;
+			return true;
 		}
 
 		if($classPath[0] !== 'Bright' && file_exists(BASEPATH . 'bright/externallibs/' . join(DIRECTORY_SEPARATOR, $classPath) . '.php'))
@@ -72,7 +72,7 @@ class BrightAutoloader {
 
 		// We don't handle namespaces
 		if(strpos($className, '\\') !== false)
-			return;
+			return false;
 
 		switch($className) {
 			case 'Backup':
@@ -215,7 +215,7 @@ class BrightAutoloader {
 
 $bal = new BrightAutoloader();
 
-Security::init();
+\Bright\utils\Security::init();
 
 function pre($val) {
 	echo'<pre>';print_r($val);echo '</pre>';

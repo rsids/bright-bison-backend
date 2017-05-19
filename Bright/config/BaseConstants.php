@@ -35,6 +35,9 @@ class BaseConstants {
 	const CACHE_MODE_FILE = 1;
 	const CACHE_MODE_APC = 2;
 
+	const FILESYSTEM_LOCAL = 1;
+	const FILESYSTEM_AWS = 2;
+
 	const MAILER_MODE_SWIFT = 1;
 	const MAILER_MODE_MAILJET = 2;
 
@@ -231,13 +234,19 @@ class BaseConstants {
 
 	protected $MAIL_MODE = BaseConstants::MAILER_MODE_SWIFT;
 
+	protected $FILESYSTEM = BaseConstants::FILESYSTEM_LOCAL;
+
+	protected $AWS_BUCKET = '';
+	protected $AWS_KEY = '';
+	protected $AWS_SECRET = '';
+
 	function __construct() {
 		// Do not change from here
 		if($this -> BASEPATH != '') {
 			trigger_error("As of 1.6, BASEPATH is not needed anymore and should not be set!\r\nRemove it from your Constants.php file",E_USER_NOTICE);
 		}
-		$p = dirname(__FILE__);
-		$p = explode(DIRECTORY_SEPARATOR, $p);
+
+		$p = explode(DIRECTORY_SEPARATOR, __DIR__);
 		$path = array_splice($p, 0, count($p)-4);
 		$this -> BASEPATH = implode(DIRECTORY_SEPARATOR, $path);
 		$this -> _fixSlashes(array('UPLOADFOLDER', 'CMSFOLDER', 'BASEURL', 'BASEPATH'));
@@ -324,6 +333,9 @@ class BaseConstants {
 
         define('CACHE_MODE',  self::CACHE_MODE_FILE);
         define('MAIL_MODE',  $this->MAIL_MODE);
+        define('AWS_BUCKET',  $this->AWS_BUCKET);
+        define('AWS_KEY',  $this->AWS_KEY);
+        define('AWS_SECRET',  $this->AWS_SECRET);
 
 		define('CACHEPREFIX', $this -> CACHEPREFIX);
 		define('SAFE_EXEC_ALLOWED', $this -> SAFE_EXEC_ALLOWED);
