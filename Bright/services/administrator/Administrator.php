@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Handles the authentication and creation / updating of administrators. Administrators are people with access to the CMS
  * @author Fur
@@ -6,49 +7,52 @@
  * @package Bright
  * @subpackage administrators
  */
-class Administrator extends Permissions {
+class Administrator extends Permissions
+{
 
-	function __construct() {
-		parent::__construct();
-		$this -> _conn = Connection::getInstance();
-	}
+    function __construct()
+    {
+        parent::__construct();
+        $this->_conn = Connection::getInstance();
+    }
 
-	/**
-	 * @var StdClass A reference to the Connection instance
-	 */
-	private $_conn;
+    /**
+     * @var StdClass A reference to the Connection instance
+     */
+    private $_conn;
 
-	/**
-	 * Authenticates a administrator by e-mail and password
-	 * @param string $email The e-mail address of the administrator
-	 * @param string $password An SHA1 hash of the password
-	 * @return OAdministratorObject A OAdministratorObject holding the properties of the administrator. Returns null when no administrator was found
-	 */
-	public function authenticate($email, $password) {
-		if($this -> IS_AUTH)
-			$this -> logoutcmd();
+    /**
+     * Authenticates a administrator by e-mail and password
+     * @param string $email The e-mail address of the administrator
+     * @param string $password An SHA1 hash of the password
+     * @return OAdministratorObject A OAdministratorObject holding the properties of the administrator. Returns null when no administrator was found
+     */
+    public function authenticate($email, $password)
+    {
+        if ($this->IS_AUTH)
+            $this->logoutcmd();
 
-		$result = $this -> auth($email, $password);
-		$administrator = new OAdministratorObject();
-		foreach($result as $row) {
-			$administrator -> id = $row -> id;
-			$administrator -> name = $row -> name;
-			$administrator -> email = $row -> email;
-			if(isset($row -> settings)) {
-				$administrator -> settings = json_decode($row -> settings);
-			}
+        $result = $this->auth($email, $password);
+        $administrator = new OAdministratorObject();
+        foreach ($result as $row) {
+            $administrator->id = $row->id;
+            $administrator->name = $row->name;
+            $administrator->email = $row->email;
+            if (isset($row->settings)) {
+                $administrator->settings = json_decode($row->settings);
+            }
 
-			$administrator -> permissions[] = $row -> permission;
-		}
-	
+            $administrator->permissions[] = $row->permission;
+        }
 
-		if($administrator -> id > 0) {
-			$this -> setAdministrator($administrator);
-			return $administrator;
-		}
 
-		return null;
-	}
+        if ($administrator->id > 0) {
+            $this->setAdministrator($administrator);
+            return $administrator;
+        }
+
+        return null;
+    }
 
     /**
      * Creates a administrator<br/>
@@ -61,32 +65,33 @@ class Administrator extends Permissions {
      * @return array An array of OAdministrators
      * @throws Exception
      */
-	public function createAdministrator(OAdministratorObject $administrator) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		if(!$this -> MANAGE_ADMIN)
-			throw $this -> throwException(1002);
+    public function createAdministrator(OAdministratorObject $administrator)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
+        if (!$this->MANAGE_ADMIN)
+            throw $this->throwException(1002);
 
-		$result = $this -> _conn -> getRow('SELECT count(id) as ids ' .
-									'FROM administrators ' .
-									'WHERE email = \'' . Connection::getInstance() -> escape_string($administrator -> email) . '\'');
-		if($result -> ids > 0)
-			throw $this -> throwException( 1006);
+        $result = $this->_conn->getRow('SELECT count(id) as ids ' .
+            'FROM administrators ' .
+            'WHERE email = \'' . Connection::getInstance()->escape_string($administrator->email) . '\'');
+        if ($result->ids > 0)
+            throw $this->throwException(1006);
 
-		$insert = $this -> _conn -> insertRow("INSERT INTO administrators (name, email, password) " .
-									"VALUES ('" . Connection::getInstance() -> escape_string($administrator -> name) . "'," .
-											"'" . Connection::getInstance() -> escape_string($administrator -> email) . "'," .
-											"'" . Connection::getInstance() -> escape_string($administrator -> password) . "')");
+        $insert = $this->_conn->insertRow("INSERT INTO administrators (name, email, password) " .
+            "VALUES ('" . Connection::getInstance()->escape_string($administrator->name) . "'," .
+            "'" . Connection::getInstance()->escape_string($administrator->email) . "'," .
+            "'" . Connection::getInstance()->escape_string($administrator->password) . "')");
 
-		$administratorId = 0;
-		if($insert > 0) {
-			$administrator -> id = $insert;
-			$this -> _setPermissionsToDb($administrator);
-			return $this -> getAdministrators();
-		} else {
-			throw $this -> throwException(1003);
-		}
-	}
+        $administratorId = 0;
+        if ($insert > 0) {
+            $administrator->id = $insert;
+            $this->_setPermissionsToDb($administrator);
+            return $this->getAdministrators();
+        } else {
+            throw $this->throwException(1003);
+        }
+    }
 
     /**
      * Deletes a administrator<br/>
@@ -99,24 +104,25 @@ class Administrator extends Permissions {
      * @return array An array of OAdministrators
      * @throws Exception
      */
-	public function deleteAdministrator(OAdministratorObject $administrator) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function deleteAdministrator(OAdministratorObject $administrator)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		if(!$this -> MANAGE_ADMIN)
-			throw $this -> throwException(1002);
+        if (!$this->MANAGE_ADMIN)
+            throw $this->throwException(1002);
 
-		$curAdministrator = $this -> getAdministrator();
-		if($curAdministrator -> id == $administrator -> id)
-			throw $this -> throwException(1004);
+        $curAdministrator = $this->getAdministrator();
+        if ($curAdministrator->id == $administrator->id)
+            throw $this->throwException(1004);
 
 
-		$this -> _unsetPermissions($administrator);
+        $this->_unsetPermissions($administrator);
 
-		$sql = 'DELETE FROM `administrators` WHERE `id`=' . (int) $administrator -> id;
-		$this -> _conn -> deleteRow($sql);
-		return $this -> getAdministrators();
-	}
+        $sql = 'DELETE FROM `administrators` WHERE `id`=' . (int)$administrator->id;
+        $this->_conn->deleteRow($sql);
+        return $this->getAdministrators();
+    }
 
     /**
      * Gets the administrator from a dataset<br/>
@@ -128,15 +134,16 @@ class Administrator extends Permissions {
      * @return OAdministratorObject The administratorobject
      * @throws Exception
      */
-	public function getAdministratorFromData(array $data) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException( 1001);
-		$administrator = new OAdministratorObject();
-		$administrator -> id = $data['administratorId'];
-		$administrator -> name = $data['name'];
-		$administrator -> email = $data['email'];
-		return $administrator;
-	}
+    public function getAdministratorFromData(array $data)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
+        $administrator = new OAdministratorObject();
+        $administrator->id = $data['administratorId'];
+        $administrator->name = $data['name'];
+        $administrator->email = $data['email'];
+        return $administrator;
+    }
 
     /**
      * Gets a list of all administrators (without their permissions)<br/>
@@ -147,25 +154,26 @@ class Administrator extends Permissions {
      * @return array An array of administrators
      * @throws Exception
      */
-	public function getAdministrators() {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function getAdministrators()
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		$result = $this -> _conn -> getRows('SELECT * FROM administrators');
+        $result = $this->_conn->getRows('SELECT * FROM administrators');
 
-		$resultarray = array();
-		foreach($result as $row) {
-			$administrator = new OAdministratorObject();
-			$administrator -> id = $row -> id;
-			$administrator -> name = $row -> name;
-			$administrator -> email = $row -> email;
-			$administrator -> permissions = $this -> getPermissionsForAdministrator($administrator);
-			$resultarray[] = $administrator;
-			unset($administrator);
-		}
+        $resultarray = array();
+        foreach ($result as $row) {
+            $administrator = new OAdministratorObject();
+            $administrator->id = $row->id;
+            $administrator->name = $row->name;
+            $administrator->email = $row->email;
+            $administrator->permissions = $this->getPermissionsForAdministrator($administrator);
+            $resultarray[] = $administrator;
+            unset($administrator);
+        }
 
-		return $resultarray;
-	}
+        return $resultarray;
+    }
 
     /**
      * Gets the permissions of a administrator<br/>
@@ -179,62 +187,64 @@ class Administrator extends Permissions {
      * @return array An array of permissions
      * @throws Exception
      */
-	public function getPermissionsForAdministrator(OAdministratorObject $administrator = null) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException( 1001);
+    public function getPermissionsForAdministrator(OAdministratorObject $administrator = null)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		if($administrator == null)
-			return $this -> getPermissions();
+        if ($administrator == null)
+            return $this->getPermissions();
 
-		$result = $this -> _conn -> getRows('SELECT permission ' .
-									'FROM administratorpermissions u ' .
-									'WHERE u.administratorId = ' . $administrator -> id);
-		$resultarray = array();
-		foreach($result as $row) {
-			$resultarray[] = $row -> permission;
-		}
+        $result = $this->_conn->getRows('SELECT permission ' .
+            'FROM administratorpermissions u ' .
+            'WHERE u.administratorId = ' . $administrator->id);
+        $resultarray = array();
+        foreach ($result as $row) {
+            $resultarray[] = $row->permission;
+        }
 
-		return $resultarray;
-	}
-	
-	
+        return $resultarray;
+    }
 
-	/**
-	 * Checks if a administrator is authenticated, if so, it returns the administrator
-	 * @param string $version The current version of the Frontend, used to check for updates
-	 * @return Administrator The authenticated administrator, or false if none was found
-	 */
-	public function isAuth($version = null) {
-		if($version) {
-			$update = new Update();
-			$update -> check($version);
-		}
 
-		if(!$this -> IS_AUTH)
-			return false;
-		$administrator = $this -> getAdministrator();
-		if((int)$administrator -> id == 0)
-			return false;
+    /**
+     * Checks if a administrator is authenticated, if so, it returns the administrator
+     * @param string $version The current version of the Frontend, used to check for updates
+     * @return Administrator|boolean The authenticated administrator, or false if none was found
+     */
+    public function isAuth($version = null)
+    {
+        if ($version) {
+            $update = new Update();
+            $update->check($version);
+        }
 
-		$query = "SELECT * 
+        if (!$this->IS_AUTH)
+            return false;
+        $administrator = $this->getAdministrator();
+        if ((int)$administrator->id == 0)
+            return false;
+
+        $query = "SELECT * 
 				FROM administrators 
-				WHERE id = " . $administrator -> id;
-		$row = $this -> _conn -> getRow($query);
-		$administrator -> name = $row -> name;
-		$administrator -> email = $row -> email;
-		if(isset($row -> settings)) {
-			$administrator -> settings = json_decode($row -> settings);
-		}
+				WHERE id = " . $administrator->id;
+        $row = $this->_conn->getRow($query);
+        $administrator->name = $row->name;
+        $administrator->email = $row->email;
+        if (isset($row->settings)) {
+            $administrator->settings = json_decode($row->settings);
+        }
 
-		return $administrator;
-	}
+        return $administrator;
+    }
 
-	/**
-	 * Logs out a administrator
-	 */
-	public function logoutcmd() {
-		$this -> resetAll();
-	}
+    /**
+     * Logs out a administrator
+     */
+    public function logoutcmd()
+    {
+        $this->resetAll();
+    }
 
     /**
      * Sets the settings for the current administrator
@@ -243,39 +253,41 @@ class Administrator extends Permissions {
      * @throws Exception
      * @since 2.3 10 oct 2011
      */
-	public function setSettings($value) {
-		
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
-		
-		// Bug in AmfPHP which does not correctly deserialize flex.messaging.io.objectproxy to php stdClass objects
-		if(isset($value -> _externalizedData)) {
-			$value = $value -> _externalizedData;
-		}
-		
-		$administrator = $this -> getAdministrator();
-		
-		$current = $this -> _conn -> getField("SELECT settings FROM administrators WHERE id=" .(int) $administrator -> id);
-		if($current) {
-			$current = json_decode($current);
-		} else {
-			$current = new stdClass();
-		}
-		foreach($value as $key => $val) {
-			$current -> $key = $val;
-		}
-		try {
-			unset($current -> _externalizedData);
-			unset($current -> _explicitType);
-		}catch(Exception $ex) {/*Swallow it*/}
-		
-		$query = 'UPDATE administrators ' .
-				"SET settings='" . Connection::getInstance() -> escape_string(json_encode($current)) . "' " .
-				'WHERE id=' . (int) $administrator -> id;
+    public function setSettings($value)
+    {
 
-		$this -> _conn -> updateRow($query);
-		return $this -> getSettings();
-	}
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
+
+        // Bug in AmfPHP which does not correctly deserialize flex.messaging.io.objectproxy to php stdClass objects
+        if (isset($value->_externalizedData)) {
+            $value = $value->_externalizedData;
+        }
+
+        $administrator = $this->getAdministrator();
+
+        $current = $this->_conn->getField("SELECT settings FROM administrators WHERE id=" . (int)$administrator->id);
+        if ($current) {
+            $current = json_decode($current);
+        } else {
+            $current = new stdClass();
+        }
+        foreach ($value as $key => $val) {
+            $current->$key = $val;
+        }
+        try {
+            unset($current->_externalizedData);
+            unset($current->_explicitType);
+        } catch (Exception $ex) {/*Swallow it*/
+        }
+
+        $query = 'UPDATE administrators ' .
+            "SET settings='" . Connection::getInstance()->escape_string(json_encode($current)) . "' " .
+            'WHERE id=' . (int)$administrator->id;
+
+        $this->_conn->updateRow($query);
+        return $this->getSettings();
+    }
 
     /**
      * Sets the visible columns in the structureView for an administrator
@@ -285,37 +297,39 @@ class Administrator extends Permissions {
      * @return bool
      * @throws Exception
      */
-	public function setVisibleColumns($cols) {
-		//DB CHANGES:
-		/*
-		 	ALTER TABLE  `administrators` ADD  `visibleColumns` VARCHAR( 255 ) NOT NULL DEFAULT  '0,1,2,3,4,5,6,7,8,9',
-			ADD  `defaultSort` INT NOT NULL DEFAULT  '5'
-		 */
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function setVisibleColumns($cols)
+    {
+        //DB CHANGES:
+        /*
+             ALTER TABLE  `administrators` ADD  `visibleColumns` VARCHAR( 255 ) NOT NULL DEFAULT  '0,1,2,3,4,5,6,7,8,9',
+            ADD  `defaultSort` INT NOT NULL DEFAULT  '5'
+         */
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
-		if(!is_array($cols))
-			throw $this -> throwException(2007);
+        if (!is_array($cols))
+            throw $this->throwException(2007);
 
-		$administrator = $this -> getAdministrator();
+        $administrator = $this->getAdministrator();
 
-		$query = 'UPDATE administrators ' .
-				"SET visibleColumns='" . Connection::getInstance() -> escape_string(join(',', $cols)) . "' " .
-				'WHERE id=' . (int) $administrator -> id;
-		$this -> _conn -> updateRow($query);
+        $query = 'UPDATE administrators ' .
+            "SET visibleColumns='" . Connection::getInstance()->escape_string(join(',', $cols)) . "' " .
+            'WHERE id=' . (int)$administrator->id;
+        $this->_conn->updateRow($query);
 
-		return true;
-	}
-	
-	public function resetSettings() {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+        return true;
+    }
+
+    public function resetSettings()
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
 
-		$curAdministrator = $this -> getAdministrator();
-		
-		$this -> _conn -> updateRow("UPDATE administrators SET settings='' WHERE id=" . (int)$curAdministrator -> id);
-	}
+        $curAdministrator = $this->getAdministrator();
+
+        $this->_conn->updateRow("UPDATE administrators SET settings='' WHERE id=" . (int)$curAdministrator->id);
+    }
 
     /**
      * Updates a administrator<br/>
@@ -328,73 +342,76 @@ class Administrator extends Permissions {
      * @return array An array of OAdministrators
      * @throws Exception
      */
-	public function updateAdministrator(OAdministratorObject $administrator) {
-		if(!$this -> IS_AUTH)
-			throw $this -> throwException(1001);
+    public function updateAdministrator(OAdministratorObject $administrator)
+    {
+        if (!$this->IS_AUTH)
+            throw $this->throwException(1001);
 
 
-		$curAdministrator = $this -> getAdministrator();
+        $curAdministrator = $this->getAdministrator();
 
-		if(!$this -> MANAGE_ADMIN && $curAdministrator -> id != $administrator -> id)
-			throw $this -> throwException(1005);
+        if (!$this->MANAGE_ADMIN && $curAdministrator->id != $administrator->id)
+            throw $this->throwException(1005);
 
-		$result = $this -> _conn -> getRow("SELECT count(id) as ids " .
-									"FROM administrators " .
-									"WHERE email = '" . Connection::getInstance() -> escape_string($administrator -> email) . "' " .
-									"AND administrators.id <> " . (int)$administrator -> id);
-		if($result -> ids > 0)
-			throw $this -> throwException(1006);
+        $result = $this->_conn->getRow("SELECT count(id) as ids " .
+            "FROM administrators " .
+            "WHERE email = '" . Connection::getInstance()->escape_string($administrator->email) . "' " .
+            "AND administrators.id <> " . (int)$administrator->id);
+        if ($result->ids > 0)
+            throw $this->throwException(1006);
 
-		$curAdministrator = $this -> getAdministrator();
-		// Update the administrator
-		$query ="UPDATE administrators " .
-				"SET email = '" . Connection::getInstance() -> escape_string($administrator -> email) . "', " .
-				"name = '" . Connection::getInstance() -> escape_string($administrator -> name) . "' ";
+        $curAdministrator = $this->getAdministrator();
+        // Update the administrator
+        $query = "UPDATE administrators " .
+            "SET email = '" . Connection::getInstance()->escape_string($administrator->email) . "', " .
+            "name = '" . Connection::getInstance()->escape_string($administrator->name) . "' ";
 
-		if($curAdministrator -> id == $administrator -> id)
-			$query .= ", password='" . Connection::getInstance() -> escape_string($administrator -> password) . "' ";
+        if ($curAdministrator->id == $administrator->id)
+            $query .= ", password='" . Connection::getInstance()->escape_string($administrator->password) . "' ";
 
-		$query .= "WHERE id = " . (int)$administrator -> id;
+        $query .= "WHERE id = " . (int)$administrator->id;
 
-		$update = $this -> _conn -> updateRow($query);
+        $update = $this->_conn->updateRow($query);
 
-		//Only update permissions when manage_administrator is set
-		if($this -> MANAGE_ADMIN)
-			$this -> _setPermissionsToDb($administrator);
+        //Only update permissions when manage_administrator is set
+        if ($this->MANAGE_ADMIN)
+            $this->_setPermissionsToDb($administrator);
 
-		// Is the updated administrator the current administrator?
-		if($curAdministrator -> id == $administrator -> id) {
-			$this -> updatePermissions($administrator -> permissions);
-		}
+        // Is the updated administrator the current administrator?
+        if ($curAdministrator->id == $administrator->id) {
+            $this->updatePermissions($administrator->permissions);
+        }
 
-		return $this -> getAdministrators();
-	}
+        return $this->getAdministrators();
+    }
 
 
-	/**
-	 * Stores the permissions of a administrator
-	 * @param OAdministratorObject $administrator The administratorobject
-	 */
-	private function _setPermissionsToDb(OAdministratorObject $administrator) {
-		// Remove permissions and projects
-		$this -> _unsetPermissions($administrator);
+    /**
+     * Stores the permissions of a administrator
+     * @param OAdministratorObject $administrator The administratorobject
+     */
+    private function _setPermissionsToDb(OAdministratorObject $administrator)
+    {
+        // Remove permissions and projects
+        $this->_unsetPermissions($administrator);
 
-		// Insert permissions
-		$query = "INSERT INTO administratorpermissions (administratorId, permission) VALUES ";
-		foreach($administrator -> permissions as $permission) {
-			$query .= "(" . $administrator -> id . ", '" . $permission . "'), ";
-		}
-		// Strip ', '
-		$query = substr($query, 0 , -2);
+        // Insert permissions
+        $query = "INSERT INTO administratorpermissions (administratorId, permission) VALUES ";
+        foreach ($administrator->permissions as $permission) {
+            $query .= "(" . $administrator->id . ", '" . $permission . "'), ";
+        }
+        // Strip ', '
+        $query = substr($query, 0, -2);
 
-		$insert = $this -> _conn -> insertRow($query);
-	}
+        $insert = $this->_conn->insertRow($query);
+    }
 
-	/**
-	 * Removes the permissions of a administrator
-	 * @param OAdministratorObject $administrator The administrator which loses his permissions
-	 */
-	private function _unsetPermissions(OAdministratorObject $administrator) {
-		$this -> _conn -> deleteRow("DELETE FROM administratorpermissions WHERE administratorId = " . (int)$administrator -> id);
-	}
+    /**
+     * Removes the permissions of a administrator
+     * @param OAdministratorObject $administrator The administrator which loses his permissions
+     */
+    private function _unsetPermissions(OAdministratorObject $administrator)
+    {
+        $this->_conn->deleteRow("DELETE FROM administratorpermissions WHERE administratorId = " . (int)$administrator->id);
+    }
 }

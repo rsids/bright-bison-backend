@@ -139,7 +139,6 @@ class Config {
 				}
 			}
 		}
-		Connection::getInstance() -> addTolog($retObj);
 		return $retObj;
 	}
 }
