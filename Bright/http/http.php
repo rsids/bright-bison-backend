@@ -43,6 +43,10 @@ if (isset($_GET['action'])) {
         }
 
     }
+    if($c ==='Export') {
+        $c = '\\Bright\\services\\export\\Export';
+    }
+
     if ($c !== null && $m !== null && $c !== false && $m != false && class_exists($c)) {
         $cls = new $c();
 
