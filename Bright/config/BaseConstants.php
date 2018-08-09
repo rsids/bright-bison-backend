@@ -2,6 +2,8 @@
 
 /**
  * Version history:
+ * 1.19 20180809
+ * - Added GOOGLE_MAPS_API_KEY
  * 1.18 20180705
  * - Added APIKEY
  * 1.17 20151113
@@ -244,6 +246,8 @@ class BaseConstants
     protected $AWS_KEY = '';
     protected $AWS_SECRET = '';
 
+    protected $GOOGLE_MAPS_API_KEY = '';
+
     function __construct()
     {
         // Do not change from here
@@ -350,6 +354,8 @@ class BaseConstants
         define('CACHEPREFIX', $this->CACHEPREFIX);
         define('SAFE_EXEC_ALLOWED', $this->SAFE_EXEC_ALLOWED);
         define('NOTIFY_BACKUP_ERRORS', $this->NOTIFY_BACKUP_ERRORS);
+        define('GOOGLE_MAPS_API_KEY', $this->GOOGLE_MAPS_API_KEY);
+
 
         foreach ($this->CUSTOM as $key => $value) {
             define($key, $value);

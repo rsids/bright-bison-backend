@@ -223,7 +223,7 @@ class Maps extends Permissions {
 	
 	public function geocode($mode, $marker) {
 		$marker = (object) $marker;
-		$baseurl = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false';
+		$baseurl = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&key=' . GOOGLE_MAPS_API_KEY;
 		switch($mode) {
 			case Maps::GEO_LOOKUPADDRESS:
 				$baseurl .= '&latlng=' . $marker  -> lat . ',' . $marker -> lng;
@@ -415,6 +415,7 @@ class Maps extends Permissions {
      * Saves a full poly
      * @param OPoly $poly
      * @return OPoly
+     * @throws Exception
      */
 	public function setFullPoly(OPoly $poly) {
 		$page = new Page();
