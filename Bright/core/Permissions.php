@@ -201,7 +201,7 @@ class Permissions
         $permissions = array();
         foreach ($this->availablePermissions as $permission) {
             if ($this->{$permission}) {
-                $permission[] = $permission;
+                $permissions[] = $permission;
             }
         }
 
