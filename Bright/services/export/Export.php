@@ -20,7 +20,7 @@ class Export
     {
 
         $tree = new \Tree();
-        $nav = $tree->getNavigation($parentId);
+        $nav = $tree->getChildren($parentId);
         foreach ($nav as &$child) {
             if ($child->numChildren > 0) {
                 $child->children = $this->_exportChildren($child->treeId, $level + 1);
