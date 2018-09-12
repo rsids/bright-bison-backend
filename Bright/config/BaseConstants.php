@@ -350,6 +350,7 @@ class BaseConstants
         define('CACHEPREFIX', $this->CACHEPREFIX);
         define('SAFE_EXEC_ALLOWED', $this->SAFE_EXEC_ALLOWED);
         define('NOTIFY_BACKUP_ERRORS', $this->NOTIFY_BACKUP_ERRORS);
+        define('FILESYSTEM', $this->FILESYSTEM);
 
 
         foreach ($this->CUSTOM as $key => $value) {
