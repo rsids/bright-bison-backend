@@ -17,16 +17,16 @@ namespace Bright\filesystem;
  * @package Bright
  * @subpackage files
  */
-class Local extends Permissions implements \Bright\interfaces\IFileSystem
+class Local extends \Permissions implements \Bright\interfaces\IFileSystem
 {
 
     /**
-     * @var StdClass Object holding the paths and folders of the userfiles
+     * @var \stdClass Object holding the paths and folders of the userfiles
      */
     private $filesettings;
 
     /**
-     * @var StdClass Holds the Connection singleton
+     * @var \stdClass Holds the Connection singleton
      */
     private $_conn;
 
@@ -35,15 +35,15 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
     {
         parent::__construct();
         $this->IS_AUTH = true;
-        $this->_conn = Connection::getInstance();
-        $cfg = new Config();
+        $this->_conn = \Connection::getInstance();
+        $cfg = new \Config();
         $this->filesettings = $cfg->getFileSettings();
     }
 
 
     /**
      * Gets the filesettings
-     * @return StdClass Object holding the paths and folders of the userfiles
+     * @return \stdClass Object holding the paths and folders of the userfiles
      */
     public function getConfig()
     {
@@ -66,7 +66,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
             // it's a file;
             $stats = @stat($fname);
             $imsize = @getimagesize($fname);
-            $obj = new StdClass();
+            $obj = new \stdClass();
             if ($stats) {
                 $obj->filesize = $stats[7];
             }
@@ -90,7 +90,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * </ul>
      * @param string $dir The parent directory, relative to the filepath specified in config.ini
      * @return array An array of directories (OFolders)
-     * @throws Exception
+     * @throws \Exception
      */
     public function getSubFolders($dir = '')
     {
@@ -105,18 +105,18 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         if (!is_dir(BASEPATH . UPLOADFOLDER)) {
             try {
                 @mkdir(BASEPATH . UPLOADFOLDER);
-            } catch (Exception $ex) {
-                throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            } catch (\Exception $ex) {
+                throw $this->throwException(\Exceptions::FOLDER_NOT_FOUND);
             }
         }
         if (!is_dir($folder))
-            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            throw $this->throwException(\Exceptions::FOLDER_NOT_FOUND);
 
         $files = scandir($folder);
         foreach ($files as $file) {
             if ($file != '.' && $file != '..' && is_dir($folder . $file)) {
 
-                $of = new OFolder();
+                $of = new \OFolder();
                 $of->label = $file;
                 $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder . $file . '/');
                 try {
@@ -127,7 +127,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
                             $of->numChildren++;
                         }
                     }
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $of->numChildren = 0;
                 }
 
@@ -150,15 +150,15 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * <ul>
      * <li>IS_AUTH</li>
      * </ul>
-     * @return array A multi-dimensional array of OFolders
-     * @throws Exception
+     * @return array A multi-dimensional array of  \OFolders
+     * @throws \Exception
      */
     public function getStructure()
     {
         if (!$this->IS_AUTH)
             throw $this->throwException(1001);
 
-        $folder = new OFolder();
+        $folder = new \OFolder();
         $folder->label = str_replace('/', '', UPLOADFOLDER);
         $folder->path = '/';
         $folder->children = $this->_readFolder('');
@@ -179,12 +179,12 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         foreach ($files as $file) {
             if ($file != '.' && $file != '..' && is_dir($folder . $file)) {
 
-                $of = new OFolder();
+                $of = new \OFolder();
                 $of->label = $file;
                 $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder . $file . '/');
                 try {
                     $of->numChildren = count(scandir($folder . $file)) - 2;
-                } catch (Exception $ex) {
+                } catch (\Exception $ex) {
                     $of->numChildren = 0;
                 }
 
@@ -209,7 +209,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param bool $extended
      * @param null $include_ext
      * @return array An array of files
-     * @throws Exception
+     * @throws \Exception
      */
     public function getFiles($dir = '', $returnThumbs = true, $exclude_ext = null, $extended = false, $include_ext = null)
     {
@@ -218,7 +218,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
 
         $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $dir . '/');
         if (!is_dir($folder))
-            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            throw $this->throwException(\Exceptions::FOLDER_NOT_FOUND);
 
         if (!$exclude_ext)
             $exclude_ext = array();
@@ -238,7 +238,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
 
                     if (count($exclude_ext) == 0 || !in_array($path_ext, $exclude_ext) && ($include_ext == null || in_array($path_ext, $include_ext))) {
 
-                        $of = new OFile();
+                        $of = new \OFile();
                         $of->filename = $file;
                         $of->path = str_replace(BASEPATH . UPLOADFOLDER, '', $folder);
                         $of->extension = $path_ext;
@@ -266,7 +266,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param string $folderName The name of the folder to create
      * @param string $dir The path of the parentfolder, relative to the base folder specified in the config.ini
      * @return array An array of folders, which are the subfolders of $dir
-     * @throws Exception
+     * @throws  \Exception
      */
     public function createFolder($folderName, $dir)
     {
@@ -313,7 +313,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param string $folderName The name of directory to delete
      * @param string $parent The directory in which the dir to delete is located, relative to the base folder specified in the config.ini
      * @return array The sub-dirs of $parent
-     * @throws Exception
+     * @throws  \Exception
      */
     public function deleteFolder($folderName, $parent)
     {
@@ -323,7 +323,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         $folder = str_replace('//', '/', BASEPATH . UPLOADFOLDER . $parent . '/');
 
         if (!is_dir($folder . $folderName))
-            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            throw $this->throwException( \Exceptions::FOLDER_NOT_FOUND);
 
 
         $success = false;
@@ -360,7 +360,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param string $newPath The target directory, relative to the base folder specified in the config.ini
      * @param string $filename The file to move
      * @return array The contents of oldpath
-     * @throws Exception
+     * @throws  \Exception
      */
     public function moveFile($oldPath, $newPath, $filename)
     {
@@ -392,14 +392,12 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         }
         if (strtolower($ext) === 'pdf') {
             // Update page
-            $page = new Page();
+            $page = new \Page();
             $p = $page->getPageByLabel(md5($oldPath . $filename));
             if ($p) {
                 $p->label = md5($newPath . $filename);
                 $p->content->path->all = $oldPath . $filename;
                 $page->setPage($p);
-            } else {
-                // Re-index
             }
         }
 
@@ -408,7 +406,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         $this->deleteThumbnails($filename, $oldPath);
 
         if (class_exists('FileHook')) {
-            $ph = new FileHook();
+            $ph = new \FileHook();
             if (method_exists($ph, 'moveFile')) {
                 $ph->moveFile($oldPath, $newPath, $filename);
             }
@@ -428,7 +426,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param string $dir The path of the file, relative to the base folder specified in the config.ini
      * @param boolean $throwNotExistsException When true, an exception is thrown when the specified file does not exist
      * @return array An array of files, which are in $path
-     * @throws Exception
+     * @throws  \Exception
      */
     public function deleteFile($filename, $dir, $throwNotExistsException = false)
     {
@@ -454,7 +452,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
             // Prevent unlink error
             try {
                 chmod($folder . $filename, 0666);
-            } catch (Exception $ex) {
+            } catch ( \Exception $ex) {
                 /*Swallow it*/
             }
             unlink($folder . $filename);
@@ -462,7 +460,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
             $this->deleteThumbnails($filename, $dir);
 
             if (class_exists('FileHook')) {
-                $ph = new FileHook();
+                $ph = new \FileHook();
                 if (method_exists($ph, 'deleteFile')) {
                     $ph->deleteFile($filename, $dir);
                 }
@@ -489,12 +487,12 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
      * @param string $filename The filename on the local server
      * @param string $parent The parent folder
      * @return object
-     * @throws Exception
+     * @throws \Exception
      */
     public function uploadFromUrl($url, $filename, $parent)
     {
         if (!$this->IS_AUTH)
-            throw $this->throwException(Exceptions::NO_USER_AUTH);
+            throw $this->throwException( \Exceptions::NO_USER_AUTH);
 
         if ($filename === '') {
             $ua = explode('/', $url);
@@ -511,20 +509,20 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         $parent = filter_var($parent, FILTER_SANITIZE_STRING);
 
         if ($url === false || $filename === false || $parent === false) {
-            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+            throw $this->throwException( \Exceptions::INCORRECT_PARAM_STRING, __LINE__);
         }
 
         if (strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
-            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+            throw $this->throwException( \Exceptions::INCORRECT_PARAM_STRING, __LINE__);
         }
 
         if (strpos($parent, '.') !== false) {
-            throw $this->throwException(Exceptions::INCORRECT_PARAM_STRING, __LINE__);
+            throw $this->throwException( \Exceptions::INCORRECT_PARAM_STRING, __LINE__);
         }
 
 
         if (!is_dir(BASEPATH . UPLOADFOLDER . $parent))
-            throw $this->throwException(Exceptions::FOLDER_NOT_FOUND);
+            throw $this->throwException( \Exceptions::FOLDER_NOT_FOUND);
 
         $local = BASEPATH . UPLOADFOLDER . $parent . '/' . $filename;
         $i = 1;
@@ -547,16 +545,16 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
 
         try {
             $ext = @file_get_contents($url);
-        } catch (Exception $e) {
-            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+        } catch ( \Exception $e) {
+            throw $this->throwException( \Exceptions::UPLOAD_FAILED);
         }
 
         if ($ext === false)
-            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+            throw $this->throwException( \Exceptions::UPLOAD_FAILED);
 
         $res = file_put_contents($local, $ext);
         if ($res === false)
-            throw $this->throwException(Exceptions::UPLOAD_FAILED);
+            throw $this->throwException( \Exceptions::UPLOAD_FAILED);
 
 
         if (strpos($filename, '.') === false) {
@@ -600,7 +598,7 @@ class Local extends Permissions implements \Bright\interfaces\IFileSystem
         }
 
         if (class_exists('FileHook')) {
-            $ph = new FileHook();
+            $ph = new \FileHook();
             if (method_exists($ph, 'uploadFile')) {
                 $ph->uploadFile($filename, $parent);
             }
