@@ -46,8 +46,12 @@ class Config {
 				'cmsfolder' => CMSFOLDER);
 		if(defined('GOOGLEMAPSAPIKEY'))
 			$retObj -> general -> googlemapsapikey = GOOGLEMAPSAPIKEY;
-		if(defined('MAPTYPE'))
-			$retObj -> general -> maptype = MAPTYPE;
+        if(defined('MAPTYPE')) {
+            $retObj -> general -> maptype = MAPTYPE;
+            if(MAPTYPE === 'osm' && defined('OSMAPIKEY')) {
+                $retObj -> general -> googlemapsapikey = OSMAPIKEY;
+            }
+        }
 		if(defined('HEADERBAR'))
 			$retObj -> general -> headerbar = HEADERBAR;
 		if(defined('ADDITIONALMODULES'))

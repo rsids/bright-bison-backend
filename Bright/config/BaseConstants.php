@@ -77,6 +77,7 @@ class BaseConstants
     protected $ADDITIONALMODULES;
 
     protected $GOOGLEMAPSAPIKEY = 'Fmjtd%7Cluua2qutnu%2C7n%3Do5-hzyg0';
+    protected $OSMAPIKEY = 'Fmjtd%7Cluua2qutnu%2C7n%3Do5-hzyg0';
 
     protected $UPLOADFOLDER = 'files/';
     protected $CMSFOLDER = 'bright/cms/';
@@ -351,6 +352,7 @@ class BaseConstants
         define('SAFE_EXEC_ALLOWED', $this->SAFE_EXEC_ALLOWED);
         define('NOTIFY_BACKUP_ERRORS', $this->NOTIFY_BACKUP_ERRORS);
         define('FILESYSTEM', $this->FILESYSTEM);
+        define('OSMAPIKEY', $this->OSMAPIKEY);
 
 
         foreach ($this->CUSTOM as $key => $value) {
