@@ -192,6 +192,13 @@ class Permissions
         }
     }
 
+    public function authCLI()
+    {
+        if(BrightUtils::inBrowser(false)) {
+            $this->_setPermissions($this->availablePermissions);
+        }
+    }
+
     /**
      * Returns an array with the permissions of the administrator
      * @return array An array with permissions
