@@ -194,7 +194,7 @@ class Permissions
 
     public function authCLI()
     {
-        if(BrightUtils::inBrowser(false)) {
+        if(!BrightUtils::inBrowser(false)) {
             $this->_setPermissions($this->availablePermissions);
         }
     }
