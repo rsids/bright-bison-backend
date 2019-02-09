@@ -441,17 +441,21 @@ class Local extends \Permissions implements \Bright\interfaces\IFileSystem
         }
 
 
-        $thumbParts = explode('.', $filename);
-        $thumbParts[count($thumbParts) - 2] .= '__thumb__';
-        $thumb = join('.', $thumbParts);
+        if(strpos($filename, '.') !== false) {
+            $thumbParts = explode('.', $filename);
 
-        if (file_exists($folder . $thumb))
-            unlink($folder . $thumb);
+            $thumbParts[count($thumbParts) - 2] .= '__thumb__';
+            $thumb = join('.', $thumbParts);
+
+            if (file_exists($folder . $thumb))
+                unlink($folder . $thumb);
+
+        }
 
         if (file_exists($folder . $filename)) {
             // Prevent unlink error
             try {
-                chmod($folder . $filename, 0666);
+                @chmod($folder . $filename, 0666);
             } catch ( \Exception $ex) {
                 /*Swallow it*/
             }
