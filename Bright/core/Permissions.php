@@ -253,6 +253,7 @@ class Permissions
     protected function setAdministrator(OAdministratorObject $administrator)
     {
         $_SESSION['administratorId'] = $administrator->id;
+        $_SESSION['administratorEmail'] = $administrator->email;
         $this->_setPermissions($administrator->permissions);
     }
 
@@ -263,8 +264,10 @@ class Permissions
     public function getAdministrator()
     {
         $administrator = new OAdministratorObject();
-        if (isset($_SESSION['administratorId']))
+        if (isset($_SESSION['administratorId'])) {
             $administrator->id = $_SESSION['administratorId'];
+            $administrator->email = $_SESSION['administratorEmail'];
+        }
         $administrator->sessionId = session_id();
         $administrator->permissions = $this->getPermissions();
         return $administrator;
@@ -276,8 +279,9 @@ class Permissions
      */
     public function getSettings()
     {
-        if (!isset($_SESSION['administratorId']))
+        if (!isset($_SESSION['administratorId'])) {
             return null;
+        }
         $sql = 'SELECT `settings` FROM `administrators` WHERE `id`=' . (int)$_SESSION['administratorId'];
         $current = Connection::getInstance()->getField($sql);
 
